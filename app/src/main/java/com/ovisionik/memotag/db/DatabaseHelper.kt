@@ -138,12 +138,15 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
     /**
      * delete the TagData from DB
      */
-    fun deleteTag(tag: TagItem) : Int {
+    fun deleteTag(tag: TagItem) : Boolean {
 
         val id = tag?.id.toString()
 
         val db = this.writableDatabase
-        return db.delete(TAG_TABLE_NAME,"ID = ?", arrayOf(id))
+
+        val res = db.delete(TAG_TABLE_NAME,"ID = ?", arrayOf(id))
+
+        return res > 0
     }
 
     /**

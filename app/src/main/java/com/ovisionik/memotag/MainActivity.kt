@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget.ListView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ovisionik.memotag.data.TagItem
@@ -81,8 +82,17 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId){
             R.id.item_delete -> {
                 //Delete item
-                filteredTagItemList.removeAt(position)
-                lvAdapter.notifyDataSetChanged()
+                val tg = filteredTagItemList[position]
+                
+                if (db.deleteTag(tg))
+                {
+                    //Deleted
+                    filteredTagItemList.removeAt(position)
+                    lvAdapter.notifyDataSetChanged()
+                }
+                else{
+                    Toast.makeText(this, "Failed to delete : ${tg.label}", Toast.LENGTH_SHORT).show()
+                }
 
             }
         }
