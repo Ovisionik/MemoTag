@@ -2,7 +2,6 @@ package com.ovisionik.memotag
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.ActionMode
 import android.view.ContextMenu
 import android.view.MenuItem
 import android.view.View
@@ -76,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
 
-        val info: AdapterView.AdapterContextMenuInfo = item.menuInfo as AdapterContextMenuInfo
+        val info: AdapterContextMenuInfo = item.menuInfo as AdapterContextMenuInfo
         val position = info.position
 
         when (item.itemId){

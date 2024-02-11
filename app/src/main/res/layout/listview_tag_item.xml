@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
+        android:baselineAligned="false"
         >
 
         <LinearLayout
@@ -26,8 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:text="Name :"
-                android:textColor="@color/light_gray"
+                android:hint="Name"
                 android:textSize="12sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -60,8 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:text="Barcode :"
-                android:textColor="@color/light_gray"
+                android:hint="Barcode"
                 android:textSize="12sp"
 
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -98,8 +97,7 @@
                 android:id="@+id/tv_price_indic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Price :"
-                android:textColor="@color/light_gray"
+                android:hint="Price"
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
