@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         fabCameraScan.setOnClickListener {
             //Intent(this, ScanQRCodeActivity::class.java).also { startActivity(it) }
-            val mintent = Intent(this, CreateItemTagActivity::class.java).also {
+            Intent(this, CreateItemTagActivity::class.java).also {
                 it.putExtra("barcode", "0565610")
                 startActivity(it)
             }

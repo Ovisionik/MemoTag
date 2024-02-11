@@ -4,38 +4,6 @@
     <string name="register_tag_success_message">Tag saved</string>
     <string name="register_tag_failed_message">Error failed to save Tag</string>
 
-    <string-array name="itemsList">
-        <item>Item Tag 1</item>
-        <item>Item Tag 2</item>
-        <item>Item Tag 3</item>
-        <item>Item Tag 4</item>
-        <item>Item Tag 5</item>
-        <item>Item Tag 6</item>
-        <item>Item Tag 7</item>
-        <item>Item Tag 8</item>
-        <item>Item Tag 9</item>
-        <item>Item Tag 10</item>
-        <item>Item Tag 1</item>
-        <item>Item Tag 2</item>
-        <item>Item Tag 3</item>
-        <item>Item Tag 4</item>
-        <item>Item Tag 5</item>
-        <item>Item Tag 6</item>
-        <item>Item Tag 7</item>
-        <item>Item Tag 8</item>
-        <item>Item Tag 9</item>
-        <item>Item Tag 10</item>
-        <item>Item Tag 1</item>
-        <item>Item Tag 2</item>
-        <item>Item Tag 3</item>
-        <item>Item Tag 4</item>
-        <item>Item Tag 5</item>
-        <item>Item Tag 6</item>
-        <item>Item Tag 7</item>
-        <item>Item Tag 8</item>
-        <item>Item Tag 9</item>
-        <item>Item Tag 10</item>
-    </string-array>
     <string name="title_activity_basic_item_tag_view">basicItemTagViewActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>

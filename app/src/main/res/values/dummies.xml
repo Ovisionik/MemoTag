@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="dummyListItems">
+        <item>Item Tag 1</item>
+        <item>Item Tag 2</item>
+        <item>Item Tag 3</item>
+        <item>Item Tag 4</item>
+        <item>Item Tag 5</item>
+        <item>Item Tag 6</item>
+        <item>Item Tag 7</item>
+        <item>Item Tag 8</item>
+        <item>Item Tag 9</item>
+        <item>Item Tag 10</item>
+        <item>Item Tag 1</item>
+        <item>Item Tag 2</item>
+        <item>Item Tag 3</item>
+        <item>Item Tag 4</item>
+        <item>Item Tag 5</item>
+        <item>Item Tag 6</item>
+        <item>Item Tag 7</item>
+        <item>Item Tag 8</item>
+        <item>Item Tag 9</item>
+        <item>Item Tag 10</item>
+        <item>Item Tag 1</item>
+        <item>Item Tag 2</item>
+        <item>Item Tag 3</item>
+        <item>Item Tag 4</item>
+        <item>Item Tag 5</item>
+        <item>Item Tag 6</item>
+        <item>Item Tag 7</item>
+        <item>Item Tag 8</item>
+        <item>Item Tag 9</item>
+        <item>Item Tag 10</item>
+    </string-array>
+
+
+</resources>
