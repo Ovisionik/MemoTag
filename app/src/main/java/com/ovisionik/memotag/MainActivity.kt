@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.ContextMenu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget.ListView
 import android.widget.Toast
@@ -52,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //tags
-        lvAdapter = TagItemListViewAdapter(this, R.layout.listview_tag_item, filteredTagItemList)
+        lvAdapter = TagItemListViewAdapter(this, R.layout.tag_item_listview_model, filteredTagItemList)
         filteredItemTagListView.adapter = lvAdapter
 
         filteredItemTagListView.setOnItemClickListener { parent, view, position, id ->
@@ -93,7 +92,6 @@ class MainActivity : AppCompatActivity() {
                 else{
                     Toast.makeText(this, "Failed to delete : ${tg.label}", Toast.LENGTH_SHORT).show()
                 }
-
             }
         }
         return super.onContextItemSelected(item)

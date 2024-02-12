@@ -4,6 +4,12 @@
     <string name="register_tag_success_message">Tag saved</string>
     <string name="register_tag_failed_message">Error failed to save Tag</string>
 
+    <string name="id_indicator">ID</string>
+    <string name="label_indicator">Label</string>
+    <string name="barcode_indicator">Barcode</string>
+    <string name="price_indicator">Price</string>
+    <string name="date_indicator">Created on</string>
+
     <string name="title_activity_basic_item_tag_view">basicItemTagViewActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>

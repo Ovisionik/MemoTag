@@ -19,13 +19,19 @@ class TagItemListViewAdapter(
 
         val itemtag = value[position]
         val itemtagview = LayoutInflater.from(mContext).inflate(resource, parent, false)
+
+        val lv_id = itemtagview.findViewById<TextView>(R.id.lv_item_tag_id)
         val lv_label = itemtagview.findViewById<TextView>(R.id.lv_item_tag_Label)
         val lv_barcode = itemtagview.findViewById<TextView>(R.id.lv_item_tag_barcode)
         val lv_price = itemtagview.findViewById<TextView>(R.id.lv_item_tag_price)
+        val lv_createdOn = itemtagview.findViewById<TextView>(R.id.lv_item_tag_created_on)
 
+
+        lv_id.text = itemtag.id.toString()
         lv_label.text = itemtag.label
         lv_barcode.text = itemtag.barcode.toString()
         lv_price.text = itemtag.price.toString() + "€"
+        lv_createdOn.text = itemtag.createdOn
 
         return itemtagview
     }
