@@ -1,6 +1,8 @@
 package com.ovisionik.memotag
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,14 +11,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 
 public class ScanQRCodeActivity : AppCompatActivity() {
-
-    private var mCodeResult = ""
-
-            var codeResult = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +28,7 @@ public class ScanQRCodeActivity : AppCompatActivity() {
         val fab_ok = findViewById<FloatingActionButton>(R.id.fab_check)
 
         //Scan Result Indicator
-        val textResult = findViewById<TextView>(R.id.code_result)
+        val tvTextResult = findViewById<TextView>(R.id.code_result)
 
         //Go Back
         fab_cancel.setOnClickListener{
@@ -39,13 +38,15 @@ public class ScanQRCodeActivity : AppCompatActivity() {
         // Open Camera
         fab_retake.setOnClickListener {
             checkCameraPermission(this)
-            textResult.text = mCodeResult
+            tvTextResult.text = ""
         }
 
         //Create or edit (use) scanned code
         fab_ok.setOnClickListener{
-            codeResult = mCodeResult
-            Toast.makeText(this, "$codeResult", Toast.LENGTH_SHORT).show()
+            val code = tvTextResult.text
+            this.intent.putExtra("itemCode", code)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
         }
 
         //Open Camera
@@ -58,20 +59,19 @@ public class ScanQRCodeActivity : AppCompatActivity() {
             result ->
         if (result.contents == null){
             Toast.makeText(this@ScanQRCodeActivity, "Scan cancelled", Toast.LENGTH_SHORT).show()
-
             //Nothing to do exit
             finish()
         }
         else {
             //Got result
-            mCodeResult = result.contents
+            this.findViewById<TextView>(R.id.code_result).text = result.contents
         }
     }
 
     private fun showCamera(){
         val option = ScanOptions()
         option.setPrompt("Scan a Code")
-        //option.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        option.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
         option.setCameraId(0)
         option.setBeepEnabled(false)
         option.setOrientationLocked(false)

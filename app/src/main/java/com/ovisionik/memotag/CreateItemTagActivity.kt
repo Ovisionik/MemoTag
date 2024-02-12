@@ -1,14 +1,21 @@
 package com.ovisionik.memotag
 
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.ovisionik.memotag.data.TagItem
+import androidx.appcompat.app.AppCompatActivity
+import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import java.time.LocalDate
 
+/**
+ * Create tag item activity :
+ * Edit an empty forum and save the TagItem in the DB
+ */
 class CreateItemTagActivity : AppCompatActivity() {
 
     private lateinit var db: DatabaseHelper
@@ -20,24 +27,38 @@ class CreateItemTagActivity : AppCompatActivity() {
         db = DatabaseHelper(this)
 
         // Get Extra
-        val barcodeExtra = intent.getStringExtra("barcode")
+        val barcodeExtra = intent.getStringExtra("itemCode")
 
-        val barcodeTV = findViewById<TextView>(R.id.acit_Barcode_tv)
+        val iv_addPicture = findViewById<ImageView>(R.id.imgViewAddPicture)
+
+        val barcodeTV = findViewById<TextView>(R.id.tv_barcode)
         val quickNoteTV = findViewById<TextView>(R.id.acit_QuickNote_tv)
 
         //Get the btn
         val btnSave = findViewById<Button>(R.id.btn_save)
         val btnCancel = findViewById<Button>(R.id.btn_cancel)
 
-        val titleET = findViewById<TextView>(R.id.acit_label_EditText)
+        val titleET = findViewById<TextView>(R.id.editText_label)
         val quickNoteET = findViewById<TextView>(R.id.acit_note_EditText)
         val quickPriceET = findViewById<TextView>(R.id.acit_price_EditText)
+
+
+
+
+
+
 
 
         barcodeTV.text = barcodeExtra?.ifEmpty { "Unknown" } ?: "null"
 
         //Set barcode text view
         barcodeTV.text =  barcodeExtra
+
+        iv_addPicture.setOnClickListener{
+            //take picture
+            //TODO
+
+        }
 
         btnCancel.setOnClickListener{
             Toast.makeText(this, "Canceled", Toast.LENGTH_SHORT).show()
@@ -59,10 +80,6 @@ class CreateItemTagActivity : AppCompatActivity() {
             }
 
             //Check empty title/text/name/label
-            if (label.isEmpty()){
-                Toast.makeText(this, "Please give it a name", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
 
             //Check the price format
             if (!quickPriceET.text.isNullOrEmpty()) {
@@ -70,10 +87,10 @@ class CreateItemTagActivity : AppCompatActivity() {
             }
 
             //If everything is a ok create the tag item
-            var tagItem = TagItem(barcode, label, price, createdOn)
+            val itemTag = ItemTag(barcode, label, price, createdOn)
 
             //Add and check if it's saved in the db
-            val isInserted = db.insertTag(tagItem)
+            val isInserted = db.insertItemTag(itemTag)
 
             //Toast the user
             if (isInserted){
@@ -86,4 +103,9 @@ class CreateItemTagActivity : AppCompatActivity() {
 
         }
     }
+
+    private fun decodeBitmapFromByteArray(byteArray: ByteArray): Bitmap {
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+
 }

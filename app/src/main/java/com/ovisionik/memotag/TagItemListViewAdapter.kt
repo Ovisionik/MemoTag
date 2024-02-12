@@ -6,14 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import com.ovisionik.memotag.data.TagItem
+import com.ovisionik.memotag.data.ItemTag
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 class TagItemListViewAdapter(
     val mContext: Context,
     val resource: Int,
-    val value: ArrayList<TagItem>,
+    val value: ArrayList<ItemTag>,
 
-    ): ArrayAdapter<TagItem>(mContext, resource, value) {
+    ): ArrayAdapter<ItemTag>(mContext, resource, value) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
@@ -30,9 +32,15 @@ class TagItemListViewAdapter(
         lv_id.text = itemtag.id.toString()
         lv_label.text = itemtag.label
         lv_barcode.text = itemtag.barcode.toString()
-        lv_price.text = itemtag.price.toString() + "€"
+        lv_price.text = intoEuroPriceFormat(itemtag.defaultPrice)
         lv_createdOn.text = itemtag.createdOn
 
         return itemtagview
+    }
+
+
+    fun intoEuroPriceFormat(price:Double) : String {
+        val df = DecimalFormat("#,###,##0.00")
+        return df.format(price).plus(" €")
     }
 }
