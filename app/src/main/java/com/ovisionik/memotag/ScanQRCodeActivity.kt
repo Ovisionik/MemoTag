@@ -2,20 +2,22 @@ package com.ovisionik.memotag
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 
 public class ScanQRCodeActivity : AppCompatActivity() {
+
+    private var mFormatName = ""
+
+    private var mScannedCode = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +45,10 @@ public class ScanQRCodeActivity : AppCompatActivity() {
 
         //Create or edit (use) scanned code
         fab_ok.setOnClickListener{
-            val code = tvTextResult.text
-            this.intent.putExtra("itemCode", code)
+            val x = mFormatName
+            val y = mScannedCode
+            this.intent.putExtra("codeFormatName", mFormatName)
+            this.intent.putExtra("itemCode", mScannedCode)
             setResult(Activity.RESULT_OK, intent)
             finish()
         }
@@ -64,7 +68,11 @@ public class ScanQRCodeActivity : AppCompatActivity() {
         }
         else {
             //Got result
-            this.findViewById<TextView>(R.id.code_result).text = result.contents
+
+            mFormatName = result.formatName
+            mScannedCode = result.contents.toString()
+
+            this.findViewById<TextView>(R.id.code_result).text = mScannedCode
         }
     }
 

@@ -36,30 +36,37 @@ class MainActivity : AppCompatActivity() {
         val barCodePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ values ->
 
             val intent = values.data
+
+            val codeFormat = intent?.getStringExtra("codeFormatName")
             val barCode = intent?.getStringExtra("itemCode")
 
             //Error
             if (barCode.isNullOrEmpty())
             {
-                //TODO log "Barcode returned is null or empty
+                Toast.makeText(this, "Err, no barcode found", Toast.LENGTH_SHORT).show()
                 return@registerForActivityResult
             }
 
             //Check barcode if exists edit if not create new
-            val tag = db.findTagByBarcode(barCode)
 
-            if (tag == null){
+            if (db.tagBarcodeExists(barCode)){
+
+                //Edit the the one that exists
+                Intent(this, ItemTagViewActivity::class.java).also {
+                    it.putExtra("itemID", db.findTagByBarcode(barCode)?.id) //.id not .label fml
+                    startActivity(it)
+                }
+
+            }else{
+
                 //Create a new tag
                 Intent(this, CreateItemTagActivity::class.java).also {
-                    it.putExtra("barCode", barCode)
+                    it.putExtra("itemCode", barCode)
+                    it.putExtra("codeFormatName", codeFormat)
                     startActivity(it)
+
                     //update list
                     filteredItemTagList = ArrayList(db.getAllTags())
-                }
-            }else{
-                Intent(this, ItemTagViewActivity::class.java).also {
-                    it.putExtra("itemID", tag.id) //.id not .label fml
-                    startActivity(it)
                 }
             }
         }
@@ -67,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         fabCameraScan.setOnClickListener{
             val intent = Intent(this, ScanQRCodeActivity::class.java)
             barCodePicker.launch(intent)
+
         }
     }
 
