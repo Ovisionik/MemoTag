@@ -45,8 +45,6 @@ public class ScanQRCodeActivity : AppCompatActivity() {
 
         //Create or edit (use) scanned code
         fab_ok.setOnClickListener{
-            val x = mFormatName
-            val y = mScannedCode
             this.intent.putExtra("codeFormatName", mFormatName)
             this.intent.putExtra("itemCode", mScannedCode)
             setResult(Activity.RESULT_OK, intent)
@@ -82,7 +80,7 @@ public class ScanQRCodeActivity : AppCompatActivity() {
         option.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
         option.setCameraId(0)
         option.setBeepEnabled(false)
-        option.setOrientationLocked(false)
+        option.setOrientationLocked(true)
 
         barCodeLauncher.launch(option)
     }

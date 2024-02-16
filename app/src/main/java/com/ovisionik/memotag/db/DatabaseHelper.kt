@@ -81,39 +81,6 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
         onCreate(db)
     }
 
-    //TODO DELETE
-    //DEBUGONLY
-    fun addTagDEBUG(tag: ItemTag): String {
-
-        //Get a writable database instance
-        val db = this.writableDatabase
-
-        val contentValues = ContentValues()
-        contentValues.put(ITEM_TAG_BARCODE, tag.barcode)
-        contentValues.put(ITEM_TAG_BARCODE_FORMAT, tag.barcodeFormat)
-        contentValues.put(ITEM_TAG_IMAGE_BYTES, tag.imageByteArray)
-        contentValues.put(ITEM_TAG_CATEGORY, tag.category)
-        contentValues.put(ITEM_TAG_LABEL, tag.label)
-        contentValues.put(ITEM_TAG_PRICE, tag.defaultPrice)
-        contentValues.put(ITEM_TAG_CREATED_ON, tag.createdOn)
-
-        //INSERT INTO tags(barcode, label, price, Creation_date) values(tag.barcode, tag.label ...)
-
-        var err = ""
-
-        try {
-            val result = db.insertOrThrow(ITEM_TAG_TABLE_NAME, null, contentValues)
-        }
-        catch (e: android.database.SQLException){
-            err = e.message.toString()
-        }
-
-        //close the db
-        db.close()
-
-        return err
-    }
-
     /**
      * Return list count
      */
@@ -179,11 +146,11 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
      */
     fun deleteTag(tag: ItemTag) : Boolean {
 
-        val id = tag.id.toString()
-
+        val id = tag.id
         val db = this.writableDatabase
+        val res = db.delete(ITEM_TAG_TABLE_NAME,"ID= ? ", arrayOf(id.toString()))
 
-        val res = db.delete(ITEM_TAG_TABLE_NAME,"ID = ?", arrayOf(id))
+        db.close()
 
         return res > 0
     }

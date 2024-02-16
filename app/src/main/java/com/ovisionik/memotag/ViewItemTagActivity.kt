@@ -14,7 +14,7 @@ import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import java.text.DecimalFormat
 
-class ItemTagViewActivity : AppCompatActivity() {
+class ViewItemTagActivity : AppCompatActivity() {
 
     private lateinit var mItemTag: ItemTag
 
@@ -45,8 +45,8 @@ class ItemTagViewActivity : AppCompatActivity() {
         val tv_barcode = findViewById<TextView>(R.id.tv_barcode)
         val tv_price_tags_label = findViewById<TextView>(R.id.tv_PriceTags_label)
 
-        val te_label = findViewById<EditText>(R.id.et_label)
-        val tv_defaultPrice = findViewById<EditText>(R.id.et_default_price)
+        val et_label = findViewById<EditText>(R.id.et_label)
+        val et_defaultPrice = findViewById<EditText>(R.id.et_default_price)
 
         val iv_image = findViewById<ImageView>(R.id.iv_image)
 
@@ -58,18 +58,30 @@ class ItemTagViewActivity : AppCompatActivity() {
         val btn_save = findViewById<Button>(R.id.btn_save)
         val btn_close = findViewById<Button>(R.id.btn_close)
 
+
         if (itemTag.imageByteArray.isNotEmpty()){
             val bmp = itemTag.imageByteArray.toBitmap()
             iv_image.setImageBitmap(bmp)
         }
 
         tv_barcode.text = mItemTag.barcode
-        te_label.hint = mItemTag.label
-        tv_defaultPrice.hint = getPriceFormatedString(mItemTag.defaultPrice)
+        et_label.hint = mItemTag.label
+        et_defaultPrice.hint = getPriceFormatedString(mItemTag.defaultPrice)
         tv_tag_date.hint = mItemTag.createdOn
 
         btn_save.setOnClickListener {
-            Toast.makeText(this, "Not yet set", Toast.LENGTH_SHORT).show()
+
+            //update_mTags
+            if (et_label.text.isNotEmpty()){
+                mItemTag.label = et_label.text.toString()
+            }
+            if (et_defaultPrice.text.isNotEmpty()){
+                mItemTag.defaultPrice = et_defaultPrice.text.toString().toDouble()
+            }
+
+            db.updateTag(mItemTag)
+
+            finish()
         }
 
         btn_close.setOnClickListener {

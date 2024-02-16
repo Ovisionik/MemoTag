@@ -2,26 +2,30 @@ package com.ovisionik.memotag
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.ContextMenu
-import android.view.MenuItem
-import android.view.View
-import android.widget.AdapterView.AdapterContextMenuInfo
-import android.widget.ListView
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
+
 
 class MainActivity : AppCompatActivity() {
 
     //FILTERED ITEMS
-    lateinit var filteredItemTagList: ArrayList<ItemTag>
-
-    lateinit var lvAdapter: TagItemListViewAdapter
 
     lateinit var db : DatabaseHelper
+
+    lateinit var recyclerViewTags: RecyclerView
+
+    lateinit var tagAdapter: RvAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,118 +33,91 @@ class MainActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
+        recyclerViewTags = findViewById<RecyclerView?>(R.id.tagItem_rv)
+
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        val etFilterList = findViewById<EditText>(R.id.et_filter_rv)
+        val ivSearchBtn = findViewById<ImageView>(R.id.iv_search)
+        setSupportActionBar(toolbar)
+
+        tagAdapter = RvAdapter(ArrayList(db.getAllTags().reversed()))
+        recyclerViewTags.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = tagAdapter
+        }
+
+        registerForContextMenu(recyclerViewTags)
+
+        etFilterList.setOnEditorActionListener { v, actionId, event ->
+
+            if (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER || actionId == EditorInfo.IME_ACTION_DONE) {
+                //do what you want on the press of 'done'
+                v.clearFocus()
+                ivSearchBtn.performClick()
+            }
+            false
+        }
+
+        ivSearchBtn.setOnClickListener{
+            val search = etFilterList.text
+            tagAdapter.filter.filter(search)
+        }
+
         //Scan button
         val fabCameraScan = findViewById<FloatingActionButton>(R.id.fab_scan_barcode)
 
         //Setup a barcode picker so get back info from the ScanQRCodeActivity
         val barCodePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ values ->
-
-            val intent = values.data
-
-            val codeFormat = intent?.getStringExtra("codeFormatName")
-            val barCode = intent?.getStringExtra("itemCode")
-
-            //Error
-            if (barCode.isNullOrEmpty())
-            {
-                Toast.makeText(this, "Err, no barcode found", Toast.LENGTH_SHORT).show()
-                return@registerForActivityResult
-            }
-
-            //Check barcode if exists edit if not create new
-
-            if (db.tagBarcodeExists(barCode)){
-
-                //Edit the the one that exists
-                Intent(this, ItemTagViewActivity::class.java).also {
-                    it.putExtra("itemID", db.findTagByBarcode(barCode)?.id) //.id not .label fml
-                    startActivity(it)
-                }
-
-            }else{
-
-                //Create a new tag
-                Intent(this, CreateItemTagActivity::class.java).also {
-                    it.putExtra("itemCode", barCode)
-                    it.putExtra("codeFormatName", codeFormat)
-                    startActivity(it)
-
-                    //update list
-                    filteredItemTagList = ArrayList(db.getAllTags())
-                }
-            }
+            cameraScan(values)
         }
 
         fabCameraScan.setOnClickListener{
             val intent = Intent(this, ScanQRCodeActivity::class.java)
             barCodePicker.launch(intent)
-
         }
     }
 
     override fun onResume() {
         super.onResume()
-
-        refreshTagListView()
+        tagAdapter = RvAdapter(ArrayList(db.getAllTags().reversed()))
+        recyclerViewTags.adapter = tagAdapter
     }
+    //Setup a barcode picker so get back info from the ScanQRCodeActivity
+    private fun cameraScan(values: ActivityResult) {
+        val intent = values.data
 
-    private fun refreshTagListView() {
+        val codeFormat = intent?.getStringExtra("codeFormatName")
+        val barCode = intent?.getStringExtra("itemCode")
 
-        //Get/init stored tag list in db
-        val storedItemTags = db.getAllTags()
+        //Error
+        if (barCode.isNullOrEmpty())
+        {
+            Toast.makeText(this, "Err, no barcode found", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        //Filter
-        //TODO filter the list as needed
-        filteredItemTagList = ArrayList(storedItemTags)
+        //Check barcode if exists edit if not create new
+        if (db.tagBarcodeExists(barCode)){
 
-        //Main List View
-        val filteredItemTagListView = findViewById<ListView>(R.id.filteredMainActTextViews)
+            //Edit the the one that exists
+            Intent(this, ViewItemTagActivity::class.java).also {
+                it.putExtra("itemID", db.findTagByBarcode(barCode)?.id) //.id not .label fml
+                startActivity(it)
+            }
 
-        lvAdapter = TagItemListViewAdapter(this, R.layout.tag_item_listview_model, filteredItemTagList)
-        filteredItemTagListView.adapter = lvAdapter
+        }else{
 
-        filteredItemTagListView.setOnItemClickListener { parent, view, position, id ->
-            //Toast.makeText(this, "Clicked on item position: $position", Toast.LENGTH_SHORT).show()
-            Intent(this, ItemTagViewActivity::class.java).also {
-                it.putExtra("itemID", filteredItemTagList[position].id)
+            //Create a new tag
+            Intent(this, CreateItemTagActivity::class.java).also {
+                it.putExtra("itemCode", barCode)
+                it.putExtra("codeFormatName", codeFormat)
                 startActivity(it)
             }
         }
 
-        registerForContextMenu(filteredItemTagListView)
+        onResume()
     }
 
-    override fun onCreateContextMenu(
-        menu: ContextMenu?,
-        v: View?,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        menuInflater.inflate(R.menu.list_context_menu, menu)
-        super.onCreateContextMenu(menu, v, menuInfo)
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-
-        val info: AdapterContextMenuInfo = item.menuInfo as AdapterContextMenuInfo
-        val position = info.position
-
-        //
-        when (item.itemId){
-            R.id.item_delete -> {
-                //Delete item
-                val tg = filteredItemTagList[position]
-                
-                if (db.deleteTag(tg))
-                {
-                    //Deleted
-                    filteredItemTagList.removeAt(position)
-                    lvAdapter.notifyDataSetChanged()
-                }
-                else{
-                    Toast.makeText(this, "Failed to delete : ${tg.label}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-        return super.onContextItemSelected(item)
-    }
 }
+
