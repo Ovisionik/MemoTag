@@ -139,7 +139,6 @@
         android:layout_height="48dp"
         android:layout_marginTop="40dp"
         android:ems="10"
-        android:focusable="false"
         android:hint="Note"
         android:selectAllOnFocus="true"
         android:singleLine="true"

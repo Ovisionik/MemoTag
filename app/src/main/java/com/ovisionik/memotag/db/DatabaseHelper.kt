@@ -178,15 +178,14 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
             val price = cursor.getDouble(cursor.getColumnIndexOrThrow(ITEM_TAG_PRICE))
             val createdOn = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_CREATED_ON))
 
-            val it = ItemTag(
-                id = id,
-                barcode = barcode,
-                barcodeFormat = barcodeFormat,
-                label = label,
-                price = price,
-                null,
-                createdOn = createdOn
-                )
+            val it = ItemTag()
+
+            it.id = id
+            it.barcode = barcode
+            it.barcodeFormat = barcodeFormat
+            it.label = label
+            it.defaultPrice = price
+            it.createdOn = createdOn
             it.imageByteArray = byteArray
             it.category = category
 
@@ -203,14 +202,7 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
      */
     fun findItemTagByID(id: Int): ItemTag? {
 
-        val itemTag:ItemTag = ItemTag(
-            barcode = "",
-            barcodeFormat = "",
-            label = "",
-            imageByteArray = ByteArray(0),
-            defaultPrice = 0.0,
-            createdOn = ""
-        )
+        val itemTag:ItemTag = ItemTag()
 
         val db = this.readableDatabase
 
@@ -234,11 +226,10 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
 
         db.close()
 
-        return if (itemTag.id == -1) {
+        return if (itemTag.id == -1)
             null
-        } else{
+        else
             itemTag
-        }
     }
 
     /**
@@ -246,7 +237,7 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
      */
     fun findTagByBarcode(barcode: String): ItemTag? {
 
-        val itemTag:ItemTag = ItemTag("", "","", 0.0, "")
+        val itemTag:ItemTag = ItemTag()
 
         val db = this.readableDatabase
 

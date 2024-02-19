@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ovisionik.memotag.db.DatabaseHelper
 
-
 class MainActivity : AppCompatActivity() {
 
     //FILTERED ITEMS
@@ -31,10 +30,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //init database
         db = DatabaseHelper(this)
 
         recyclerViewTags = findViewById<RecyclerView?>(R.id.tagItem_rv)
-
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val etFilterList = findViewById<EditText>(R.id.et_filter_rv)

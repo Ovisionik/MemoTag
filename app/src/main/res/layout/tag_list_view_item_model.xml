@@ -64,7 +64,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:gravity="bottom|end"
-            android:text="date"
+            android:text="1999.06.09 12:30"
             android:textStyle="italic" />
 
         <TextView

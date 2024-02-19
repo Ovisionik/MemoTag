@@ -2,6 +2,7 @@ package com.ovisionik.memotag
 
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,14 +11,16 @@ import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import java.text.DecimalFormat
 
+
 class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapter.ViewHolder>(), Filterable {
 
-    var filteredTags: ArrayList<ItemTag> = ArrayList<ItemTag>()
+    var filteredTags: ArrayList<ItemTag> = ArrayList()
 
     init {
         filteredTags = items as ArrayList<ItemTag>
@@ -36,9 +39,30 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
         val mItemTag = filteredTags[position]
         val db = DatabaseHelper(holder.itemView.context)
 
+        holder.itemView.setOnLongClickListener{
+            Toast.makeText(it.context, "OnLongClickListener", Toast.LENGTH_SHORT).show()
+            true
+        }
+
         //Show option button
         holder.btnMoreOption.setOnClickListener{ view ->
-            val popupMenu = PopupMenu(view.context, view)
+            val popupMenu = PopupMenu(
+                view.context,
+                view,
+                Gravity.NO_GRAVITY, )
+
+            //Show icon (no idea why it's not showing by default)
+            try {
+                val method = popupMenu.menu.javaClass.getDeclaredMethod(
+                    "setOptionalIconsVisible",
+                    Boolean::class.javaPrimitiveType
+                )
+                method.isAccessible = true
+                method.invoke(popupMenu.menu, true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
             popupMenu.inflate(R.menu.list_context_menu)
             popupMenu.setOnMenuItemClickListener {
                 when(it.itemId){
@@ -55,6 +79,7 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                 }
             }
             popupMenu.show()
+            true
         }
 
         //On item click logic
@@ -70,7 +95,7 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
         holder.bindToView(mItemTag)
     }
 
-    class ViewHolder(itemView: View,) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         var tvTitle : TextView
         var tvID : TextView
@@ -113,20 +138,22 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                 val text = constraint.toString().lowercase()
 
                 filteredTags = items as ArrayList<ItemTag>
-                if (text.isEmpty()){
-                    //something something
-                }
-                if (text.length > 3){
-                    val result = items.filter { filter ->
-                        filter.label.lowercase().contains(text)
-                            || filter.barcode.lowercase().contains(text)
-                    }
-                    filteredTags = ArrayList(result)
-                }
 
                 val filterResults = FilterResults()
-                filterResults.values = filteredTags
 
+                if (text.isEmpty() || text.length < 2){
+                    filterResults.values = filteredTags
+                    return filterResults
+                }
+
+
+                val result = items.filter { filter ->
+                    filter.label.lowercase().contains(text)
+                            || filter.barcode.lowercase().contains(text)
+                }
+
+                filteredTags = ArrayList(result)
+                filterResults.values = filteredTags
                 return filterResults
             }
 

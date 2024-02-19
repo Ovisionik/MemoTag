@@ -4,7 +4,10 @@
     <item
         android:id="@+id/delete_item"
         android:icon="@drawable/ic_delete"
-        android:iconTint="@color/red"
+        android:iconTint="@color/design_default_color_error"
         android:title="Delete"
-        app:showAsAction="withText"/>
+        android:titleCondensed="del"
+        android:visible="true"
+        app:showAsAction="withText"
+        />
 </menu>

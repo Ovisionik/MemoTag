@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import java.io.ByteArrayOutputStream
-import java.time.LocalDate
 
 
 /**
@@ -30,9 +29,9 @@ class CreateItemTagActivity : AppCompatActivity() {
 
     private val picPreview = registerForActivityResult(ActivityResultContracts.TakePicturePreview()
     ){
-            bmp ->
+        bmp ->
         if (bmp != null){
-            val resizedBmp = bmp.removeXPercent(0.4,0.5)
+            val resizedBmp = bmp.removeXPercent(0.3,0.3)
             iv_AddPicture.setImageBitmap(resizedBmp)
             tmpByteArray = resizedBmp.toByteArray()
         }
@@ -86,7 +85,6 @@ class CreateItemTagActivity : AppCompatActivity() {
             val bcFormat = codeFormat.toString()
             val label:String = et_title.text.toString()
             var price: Double = 0.0
-            val createdOn:String = LocalDate.now().toString()
             val byteArray = tmpByteArray
 
             //Check duplicates
@@ -102,11 +100,10 @@ class CreateItemTagActivity : AppCompatActivity() {
 
             //If everything is a ok create the tag item
             val itemTag = ItemTag(
-                barcode,
-                bcFormat,
-                label,
-                price,
-                createdOn,
+                barcode = barcode,
+                barcodeFormat =  bcFormat,
+                label =  label,
+                defaultPrice = price,
                 imageByteArray = byteArray
             )
 
