@@ -17,7 +17,6 @@ import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import java.text.DecimalFormat
 
-
 class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapter.ViewHolder>(), Filterable {
 
     var filteredTags: ArrayList<ItemTag> = ArrayList()
@@ -84,9 +83,9 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
 
         //On item click logic
         holder.itemView.setOnClickListener{ view ->
-            val context = view.context
 
-            Intent(context, ViewItemTagActivity::class.java).also {
+            val context = view.context
+            val intent = Intent(context, ViewItemTagActivity::class.java).also {
                 it.putExtra("itemID", mItemTag.id)
                 context.startActivity(it)
                 notifyItemChanged(position)
@@ -145,7 +144,6 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                     filterResults.values = filteredTags
                     return filterResults
                 }
-
 
                 val result = items.filter { filter ->
                     filter.label.lowercase().contains(text)

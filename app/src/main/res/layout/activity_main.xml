@@ -60,16 +60,23 @@
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tagItem_rv"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        android:layout_alignParentBottom="true"
+        >
 
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:entries="@array/dummyListItems"
-        tools:itemCount="15"
-        tools:listitem="@layout/tag_list_view_item_model" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tagItem_rv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:entries="@array/dummyListItems"
+            tools:itemCount="5"
+            tools:listitem="@layout/tag_list_view_item_model" />
+
+    </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_scan_barcode"

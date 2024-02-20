@@ -170,7 +170,7 @@ class ViewItemTagActivity : AppCompatActivity() {
             }
 
             db.updateTag(mItemTag)
-
+            super.onResume()
             finish()
         }
 
@@ -184,16 +184,17 @@ class ViewItemTagActivity : AppCompatActivity() {
     private fun updateViews() {
 
         lifecycleScope.launch(Dispatchers.Main) {
-            //Item picture display
-            if (mItemTag.imageByteArray.isNotEmpty() && !showBarcode){
-                val bmp = mItemTag.imageByteArray.toBitmap()
-                iv_ImageDisplay.setImageBitmap(bmp)
+
+            var toggleSymbol:String = "◈"
+
+            if (!showBarcode && mItemTag.imageByteArray.isNotEmpty()){
+                //Item picture display
+                toggleSymbol = "❖"
+                iv_ImageDisplay.setImageBitmap(
+                mItemTag.imageByteArray.toBitmap())
             }
 
-            var toggleSymbol:String = "◀"
-            if (showBarcode){ toggleSymbol = "⧋" }
-
-            tv_barcode.text = mItemTag.barcode.plus(toggleSymbol)
+            tv_barcode.text = mItemTag.barcode.plus(" $toggleSymbol")
 
             et_label.hint = mItemTag.label
 
@@ -248,7 +249,7 @@ class ViewItemTagActivity : AppCompatActivity() {
                         bmp.setPixel(x,y, if (bitMatrix[x,y]) Color.BLACK else Color.WHITE)
                     }
                 }
-                if (showBarcode){ tv_barcode.text = mItemTag.barcode.plus( " ⧋") }
+                if (showBarcode){ tv_barcode.text = mItemTag.barcode.plus( " ◈") }
                 iv_ImageDisplay.setImageBitmap(bmp)
 
             }catch (err : WriterException){

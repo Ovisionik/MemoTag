@@ -79,8 +79,33 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        tagAdapter = RvAdapter(ArrayList(db.getAllTags().reversed()))
-        recyclerViewTags.adapter = tagAdapter
+
+        //Update adapter
+        val dbTags = db.getAllTags().reversed()
+
+        //update the adapter only if the number of items are different
+        if (tagAdapter.filteredTags.hashCode() != dbTags.hashCode()){
+
+            //Check size if it's the same only item needs to update
+            if (tagAdapter.filteredTags.size == dbTags.size){
+
+                val filTags = tagAdapter.filteredTags
+                for (i in dbTags.indices){
+                    if (dbTags[i].id == filTags[i].id && dbTags[i].hashCode() != filTags[i].hashCode()){
+                        //item changed
+                        tagAdapter.filteredTags[i] = dbTags[i]
+                        recyclerViewTags.adapter?.notifyItemChanged(i)
+                    }
+                }
+            }
+            else{
+                //We could check and update each individual item
+
+                //... or update everything in the list
+                tagAdapter = RvAdapter(ArrayList(dbTags))
+                recyclerViewTags.adapter = tagAdapter
+            }
+        }
     }
     //Setup a barcode picker so get back info from the ScanQRCodeActivity
     private fun cameraScan(values: ActivityResult) {
