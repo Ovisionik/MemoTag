@@ -1,10 +1,14 @@
 package com.ovisionik.memotag
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -35,27 +39,45 @@ import java.text.DecimalFormat
 
 class EditTagActivity : AppCompatActivity() {
 
-    var showBarcode: Boolean = false
+    private var mDisplayBarcode: Boolean = false
 
-    private lateinit var mItemTag: ItemTag
-    private lateinit var db : DatabaseHelper
+    //Utils//
+    private lateinit var db                 :DatabaseHelper
+    private lateinit var scraper            :BarcodeScraper
+    private lateinit var mItemTag           :ItemTag
 
-    lateinit var scraper       :BarcodeScraper
+    // 'normal' Views //
+    private lateinit var ivImageDisplay     :ImageView
+    private lateinit var ivBarcodeDisplay   :ImageView
+    private lateinit var lvPriceTags        :ListView
+    private lateinit var etLabel            :EditText
+    private lateinit var etBrand            :EditText
+    private lateinit var etDefaultPrice     :EditText
+    private lateinit var tvTagCreationDate  :TextView
+    private lateinit var tvBarcode          :TextView
 
-    //Views
-    lateinit var iv_ImageDisplay        :ImageView
-    lateinit var lv_price_tags          :ListView
-    lateinit var et_label               :EditText
-    lateinit var et_brand               :EditText
-    lateinit var et_defaultPrice        :EditText
-    lateinit var tv_price_tags_label    :TextView
-    lateinit var tv_tag_date            :TextView
-    lateinit var tv_barcode             :TextView
+    //button views//
+    private lateinit var btnSave            :Button
+    private lateinit var btnClose           :Button
+    private lateinit var btnWebSearch       :Button
 
-    //btn views
-    lateinit var btnSave        :Button
-    lateinit var btnClose       :Button
-    lateinit var btnWebSearch   :Button
+    private fun initVar() {
+
+        //--Views--//
+        etLabel = findViewById(R.id.et_label)
+        etBrand = findViewById(R.id.et_brand)
+        tvBarcode = findViewById(R.id.tv_barcode)
+        etDefaultPrice = findViewById(R.id.et_default_price)
+        tvTagCreationDate = findViewById(R.id.tv_tag_date)
+        lvPriceTags = findViewById(R.id.price_tags_lv)
+        ivImageDisplay = findViewById(R.id.iv_image)
+        ivBarcodeDisplay = findViewById(R.id.iv_barcode)
+
+        //--Buttons views--//
+        btnSave = findViewById(R.id.btn_save)
+        btnClose = findViewById(R.id.btn_close)
+        btnWebSearch = findViewById(R.id.btn_web_scrap)
+    }
 
     private val picPreview = registerForActivityResult(
         ActivityResultContracts.TakePicturePreview()
@@ -63,7 +85,7 @@ class EditTagActivity : AppCompatActivity() {
             bmp ->
         if (bmp != null){
             val resizedBmp = bmp.removeXPercent(0.3,0.3)
-            iv_ImageDisplay.setImageBitmap(resizedBmp)
+            ivImageDisplay.setImageBitmap(resizedBmp)
             mItemTag.imageByteArray = resizedBmp.toByteArray()
         }
     }
@@ -71,12 +93,10 @@ class EditTagActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_item_tag)
 
+
         //init database
         db = DatabaseHelper(this)
-
-        //Get a scraper
         scraper = BarcodeScraper()
-
         mItemTag = ItemTag()
 
         //get possible the extras
@@ -109,42 +129,38 @@ class EditTagActivity : AppCompatActivity() {
             }
 
             val itemTag = ItemTag()
-                itemTag.barcode = barcode
-                itemTag.barcodeFormat = codeFormat?: ""
+            itemTag.barcode = barcode
+            itemTag.barcodeFormat = codeFormat?: ""
 
             mItemTag= itemTag
         }
 
-        //Get fields
-        tv_price_tags_label = findViewById(R.id.tv_PriceTags_label)
-        et_label = findViewById(R.id.et_label)
-        et_brand = findViewById(R.id.et_brand)
-        et_defaultPrice = findViewById(R.id.et_default_price)
-        tv_tag_date = findViewById(R.id.tv_tag_date)
-        lv_price_tags = findViewById(R.id.price_tags_lv)
-        iv_ImageDisplay = findViewById(R.id.iv_image)
-        tv_barcode = findViewById(R.id.tv_barcode)
-
-        //buttons
-        btnSave = findViewById(R.id.btn_save)
-        btnClose = findViewById(R.id.btn_close)
-        btnWebSearch = findViewById(R.id.btn_web_scrap)
+        //Initialize private hooks
+        initVar()
 
         //Set/Update view
         updateViews()
 
-        iv_ImageDisplay.setOnClickListener{
+        //Hide barcode & show image
+        loadImageDisplay(mDisplayBarcode)
+
+        ivImageDisplay.setOnClickListener{
             picPreview.launch()
         }
 
         //Toggle Image and Barcode view
-        tv_barcode.setOnClickListener { toggleItemDisplay() }
+        tvBarcode.setOnClickListener { toggleItemDisplay() }
 
         //Close
         btnClose.setOnClickListener { finish() }
 
         //Scrap product value from the web
         btnWebSearch.setOnClickListener{
+
+            if (!isOnline(this)) {
+                Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             // Start a coroutine in the IO context
             lifecycleScope.launch(Dispatchers.IO){
@@ -158,9 +174,6 @@ class EditTagActivity : AppCompatActivity() {
                 }
 
                 result.onSuccess { scrap ->
-                    if (scrap == null)
-                        return@launch
-
                     //Fill only if blank(empty or white space)
                     if (mItemTag.label.isBlank())       { mItemTag.label    = scrap.label       }
                     if (mItemTag.brand.isBlank())       { mItemTag.brand    = scrap.brand       }
@@ -170,14 +183,18 @@ class EditTagActivity : AppCompatActivity() {
                     async{
                         //Add store the image from url to the bitarray if it was empty
                         scraper.asyncGetBitmapFromURL(scrap.imageURL).onSuccess { bmp ->
-                            if (bmp!=null && mItemTag.imageByteArray.isEmpty()){
+                            if (mItemTag.imageByteArray.isEmpty()){
                                 mItemTag.imageByteArray = bmp.toByteArray()
                             }
                         }
                     }.await()
 
-                    //Update views
-                    updateViews()
+                    launch(Dispatchers.Main) {
+                        //Update views
+                        Toast.makeText(applicationContext, "Done", Toast.LENGTH_SHORT).show()
+                        loadImageDisplay(false)
+                        updateViews()
+                    }
                 }
             }
         }
@@ -186,14 +203,14 @@ class EditTagActivity : AppCompatActivity() {
         btnSave.setOnClickListener {
 
             //update_mTags
-            if (et_label.text.isNotEmpty()){
-                mItemTag.label = et_label.text.toString()
+            if (etLabel.text.isNotEmpty()){
+                mItemTag.label = etLabel.text.toString()
             }
-            if (et_brand.text.isNotEmpty()){
-                mItemTag.brand = et_brand.text.toString()
+            if (etBrand.text.isNotEmpty()){
+                mItemTag.brand = etBrand.text.toString()
             }
-            if (et_defaultPrice.text.isNotEmpty()){
-                mItemTag.defaultPrice = et_defaultPrice.text.toString().toDouble()
+            if (etDefaultPrice.text.isNotEmpty()){
+                mItemTag.defaultPrice = etDefaultPrice.text.toString().toDouble()
             }
 
             //If exists update else create
@@ -211,98 +228,117 @@ class EditTagActivity : AppCompatActivity() {
         //TODO Tag Prices List view adapter
     }
 
-
     /**
      * Update all the binding for the visual elements
      */
     private fun updateViews() {
 
-        lifecycleScope.launch(Dispatchers.Main) {
+        //barcode
+        tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode)"◈" else "❖")
 
-            var toggleSymbol:String = "❖"
+        //label
+        etLabel.hint = mItemTag.label
 
-            if (!showBarcode){
-                //Item picture display
-                toggleSymbol = "◈"
+        //brand
+        etBrand.hint = mItemTag.brand
 
-                //Show imageIf it's was stored or a drawable
-                if (mItemTag.imageByteArray.isNotEmpty())
-                {
-                    iv_ImageDisplay.setImageBitmap(
-                        mItemTag.imageByteArray.toBitmap())
-                }else{
-                    iv_ImageDisplay.setImageResource(R.drawable.ic_add_a_photo)
-                }
-            }
+        //price
+        etDefaultPrice.hint = getPriceFormattedString(mItemTag.defaultPrice)
 
-            //barcode
-            tv_barcode.text = mItemTag.barcode.plus(" $toggleSymbol")
-
-            //label
-            et_label.hint = mItemTag.label
-
-            //brand
-            et_brand.hint = mItemTag.brand
-
-            //price
-            et_defaultPrice.hint = getPriceFormattedString(mItemTag.defaultPrice)
-
-            //date
-            tv_tag_date.hint = mItemTag.createdOn
-        }
+        //date
+        tvTagCreationDate.hint = mItemTag.createdOn
     }
 
     private fun toggleItemDisplay() {
-        showBarcode = !showBarcode
 
-        if (showBarcode){
-            //Format
-            val format = BarcodeFormat.valueOf(mItemTag.barcodeFormat)
+        //!mDisplayBarcode because we are trying to toggle
+        val success = loadImageDisplay(!mDisplayBarcode)
+        if (success) {
+            val toggleSymbolExpand = "❖"
+            val toggleSymbolCollapse = "◈"
+            tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode) toggleSymbolExpand else toggleSymbolCollapse)
 
-            //Writer
-            val writer: Writer = when (format){
-                BarcodeFormat.AZTEC -> AztecWriter()
-                BarcodeFormat.EAN_13 -> EAN13Writer()
-                BarcodeFormat.EAN_8 -> EAN8Writer()
-                BarcodeFormat.CODE_128 -> Code128Writer()
-                BarcodeFormat.CODABAR -> Code128Writer()
-                BarcodeFormat.QR_CODE -> QRCodeWriter()
-                else -> {
-                    Toast.makeText(this, "Sorry, can't recreate the barcode", Toast.LENGTH_SHORT).show()
-                    return
-                }
-            }
+            //Toggle the boolean
+            mDisplayBarcode = !mDisplayBarcode
+        }else{
+            //Couldn't load
+            Toast.makeText(this, "Couldn't load the image", Toast.LENGTH_SHORT).show()
+            return
+        }
+    }
 
-            if (mItemTag.barcode.isEmpty()){
-                Toast.makeText(this, "Cant generate barcode", Toast.LENGTH_SHORT).show()
-                return
-            }
+    /**
+     * load image for the image display
+     *
+     * loadBarcodeBitmap? load barcode image else load item image
+     * returns true successful
+     */
+    private fun loadImageDisplay(loadBarcodeBitmap: Boolean): Boolean {
 
-            try {
-                val bitMatrix = writer.encode(mItemTag.barcode, format, 1024, 512)
-                val width = bitMatrix.width
-                val height = bitMatrix.height
+        //Show barcode image
+        if (loadBarcodeBitmap){
+            //create the images only if it's not cashed
+            if (ivBarcodeDisplay.drawable == null){
 
-                val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-                for (x in 0 until width){
-                    for (y in 0 until height){
-                        bmp.setPixel(x,y, if (bitMatrix[x,y]) Color.BLACK else Color.WHITE)
+                //barcode format
+                val format = BarcodeFormat.valueOf(mItemTag.barcodeFormat)
+
+                //Writer
+                val writer: Writer = when (format){
+                    BarcodeFormat.AZTEC -> AztecWriter()
+                    BarcodeFormat.EAN_13 -> EAN13Writer()
+                    BarcodeFormat.EAN_8 -> EAN8Writer()
+                    BarcodeFormat.CODE_128 -> Code128Writer()
+                    BarcodeFormat.CODABAR -> Code128Writer()
+                    BarcodeFormat.QR_CODE -> QRCodeWriter()
+                    else -> {
+                        Toast.makeText(this, "Sorry, can't recreate the barcode", Toast.LENGTH_SHORT).show()
+                        return false
                     }
                 }
-                if (showBarcode){ tv_barcode.text = mItemTag.barcode.plus( " ❖") }
-                iv_ImageDisplay.setImageBitmap(bmp)
 
-            }catch (err : WriterException){
-                Toast.makeText(this, "${err.message}", Toast.LENGTH_SHORT).show()
-                err.printStackTrace()
+                //Nothing to gen
+                if (mItemTag.barcode.isEmpty()){
+                    Toast.makeText(this, "Cant generate barcode", Toast.LENGTH_SHORT).show()
+                    return false
+                }
 
-                //Reset the view since we have nothing to show
-                showBarcode = false
+                try {
+                    val bitMatrix = writer.encode(mItemTag.barcode, format, 1024, 512)
+                    val width = bitMatrix.width
+                    val height = bitMatrix.height
+
+                    val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+                    for (x in 0 until width){
+                        for (y in 0 until height){
+                            bmp.setPixel(x,y, if (bitMatrix[x,y]) Color.BLACK else Color.WHITE)
+                        }
+                    }
+                    ivBarcodeDisplay.setImageBitmap(bmp)
+
+                }catch (err : WriterException){
+                    Toast.makeText(this@EditTagActivity, "${err.message}", Toast.LENGTH_SHORT).show()
+                    err.printStackTrace()
+                    //we have nothing to show
+                    return false
+                }
             }
         }
         else{
-            updateViews()
+            //Show product image
+            if (mItemTag.imageByteArray.isNotEmpty())
+            {
+                //From ByteArray
+                ivImageDisplay.setImageBitmap(
+                    mItemTag.imageByteArray.toBitmap())
+            }else{
+                //if there is still no image show the place holder
+                ivImageDisplay.setImageResource(R.drawable.ic_add_a_photo)
+            }
         }
+        ivBarcodeDisplay.visibility = if (loadBarcodeBitmap) View.VISIBLE else View.INVISIBLE
+        ivImageDisplay.visibility = if (loadBarcodeBitmap) View.INVISIBLE else View.VISIBLE
+        return true
     }
 
     private fun getPriceFormattedString(price: Number): String {
@@ -315,17 +351,11 @@ class EditTagActivity : AppCompatActivity() {
      * ie i want to crop/reduce the height by 20% -> height: 0.2
      * double must be between 0.0 and 1.0
      */
-    fun Bitmap.removeXPercent(width: Double, height: Double): Bitmap {
+    private fun Bitmap.removeXPercent(width: Double, height: Double): Bitmap {
 
-        if (width > 1 || height > 1)
-        {
-            return this
-        }
-
+        if (width > 1 || height > 1) { return this }
         //input = % to remove, not to keep, so let's get how much we need to cut
-
         val keepWidth = 1.0 - width
-
         val keepHeight = 1.0 - height
 
         val desPxW = this.width * keepWidth
@@ -342,7 +372,28 @@ class EditTagActivity : AppCompatActivity() {
 
         return stream.toByteArray()
     }
-    fun ByteArray.toBitmap(): Bitmap {
+    private fun ByteArray.toBitmap(): Bitmap {
         return BitmapFactory.decodeByteArray(this, 0, this.size)
+    }
+
+    private fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                return true
+            }
+        }
+        return false
     }
 }

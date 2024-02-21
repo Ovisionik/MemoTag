@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="136dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-
+    android:layout_width="match_parent"
+    android:layout_height="130dp"
     android:layout_marginVertical="2dp"
     android:layout_marginHorizontal="4dp"
     app:cardCornerRadius="8dp"
@@ -12,10 +11,8 @@
     >
 
     <RelativeLayout
-        android:background="?attr/colorOnSecondary"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
 
         <ImageView
             android:contentDescription="card view option"
@@ -35,7 +32,8 @@
 
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="0dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
 
@@ -60,7 +58,7 @@
             android:gravity="center_horizontal"
             android:maxLines="1"
 
-            android:text="Label"
+            tools:text="Label"
             android:textAlignment="center"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -76,7 +74,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:gravity="bottom|end"
-            android:text="1999.06.09 12:30"
+            tools:text="1999.06.09 12:30"
             android:textStyle="italic" />
 
 
@@ -101,7 +99,7 @@
             android:layout_toEndOf="@+id/brand_indic"
             android:layout_toStartOf="@+id/cv_price_value"
 
-            android:text="SomebrandTM" />
+            tools:text="Some brand TM" />
 
         <TextView
             android:id="@+id/category_indic"
@@ -119,7 +117,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:text="Other"
+            tools:text="Other"
             android:maxLines="1"
             android:padding="2dp"
 
@@ -145,7 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:text="48564642"
+            tools:text="48564642"
             android:maxLines="1"
             android:padding="2dp"
 
@@ -171,7 +169,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:text="12"
+            tools:text="12"
             android:maxLines="1"
             android:padding="2dp"
 
@@ -189,18 +187,13 @@
             android:layout_alignParentEnd="true"
 
             android:layout_centerInParent="true"
+
             android:gravity="center|end"
 
             android:maxWidth="100dp"
-
             android:padding="8dp"
-            android:text="12.5 €"
+            tools:text="12.5 €"
             android:textStyle="bold" />
 
-
-
-
     </RelativeLayout>
-
-
 </androidx.cardview.widget.CardView>

@@ -4,13 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EditTagActivity" >
+    tools:context=".EditTagActivity">
 
     <EditText
         android:id="@+id/et_label"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:gravity="start|bottom"
         android:ems="10"
         android:maxLines="1"
@@ -18,18 +17,20 @@
         android:inputType="textCapWords"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:hint="Label"
+        android:autofillHints="name"
+        tools:hint="Label"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/tv_name_indic"
         app:layout_constraintTop_toBottomOf="@+id/tv_name_indic" />
 
     <TextView
         android:id="@+id/tv_barcode"
+        android:layout_marginTop="200dp"
         android:layout_width="0dp"
         android:layout_height="32dp"
         android:elegantTextHeight="true"
-        android:text="Barcode ▲"
+        tools:text="Barcode ▲"
         android:textAlignment="center"
         android:textAllCaps="false"
         android:textIsSelectable="false"
@@ -38,7 +39,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_image" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_brand_indic"
@@ -56,14 +57,15 @@
         android:id="@+id/et_brand"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:inputType="textCapWords"
         android:textSize="14sp"
         android:ems="10"
         android:maxLines="1"
         android:gravity="start|bottom"
-        android:hint="Brand Name Ltd"
-        android:layout_marginStart="8dp"
+        android:autofillHints="name"
+        tools:hint="Brand Name Ltd"
         app:layout_constraintTop_toBottomOf="@+id/tv_brand_indic"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/tv_brand_indic"
         />
 
 
@@ -106,12 +108,77 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_PriceTags_label" />
 
+    <ImageView
+        android:visibility="visible"
+        android:id="@+id/iv_barcode"
+        android:layout_width="match_parent"
+        android:layout_height="188dp"
+        android:layout_margin="8dp"
+
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/ic_barcode" />
+
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/iv_image"
+        android:layout_width="match_parent"
+        android:layout_height="188dp"
+        android:layout_margin="8dp"
+
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_add_a_photo" />
+
+    <EditText
+        android:id="@+id/et_default_price"
+        android:layout_width="70dp"
+        android:layout_height="42dp"
+        android:textAlignment="textEnd"
+        android:inputType="numberDecimal"
+        android:padding="0dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintRight_toRightOf="@id/tv_price_indic"
+        app:layout_constraintTop_toBottomOf="@+id/tv_price_indic"
+        tools:hint="1.20 €"
+        />
+
+    <TextView
+        android:id="@+id/tv_price_indic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:hint="Price"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
+
+    <TextView
+        android:id="@+id/tv_tag_date"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        tools:hint="Date"
+        android:textAlignment="textEnd"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toTopOf="@+id/tv_PriceTags_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_brand"
+        />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="40dp"
-        app:backgroundTint="@color/cadmium_violet"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -120,7 +187,7 @@
             android:id="@+id/btn_save"
             android:layout_width="wrap_content"
             android:layout_height="45dp"
-            android:layout_gravity="right|center"
+            android:layout_gravity="end|center"
             android:focusable="true"
             android:text="Save"
             />
@@ -140,60 +207,8 @@
             android:id="@+id/btn_close"
             android:layout_width="wrap_content"
             android:layout_height="45dp"
-            android:layout_gravity="left|center"
+            android:layout_gravity="start|center"
             android:text="Close" />
     </com.google.android.material.bottomnavigation.BottomNavigationView>
-
-    <EditText
-        android:id="@+id/et_default_price"
-        android:layout_width="70dp"
-        android:layout_height="42dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="textEnd"
-        android:inputType="numberDecimal"
-        android:padding="0dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_price_indic"
-        tools:hint="1.20 €"
-        />
-
-    <TextView
-        android:id="@+id/tv_price_indic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:hint="Price"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
-
-    <ImageView
-        android:id="@+id/iv_image"
-        android:layout_width="match_parent"
-        android:layout_height="188dp"
-        android:layout_margin="8dp"
-
-        android:scaleType="fitCenter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_add_a_photo" />
-
-    <TextView
-        android:id="@+id/tv_tag_date"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:hint="Date"
-        android:textAlignment="textEnd"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toTopOf="@+id/tv_PriceTags_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_brand"
-        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,19 +4,20 @@ import java.time.format.DateTimeFormatter
 
 data class ItemTag (
 
+    //ID Auto assigned in DB
     var id: Int = -1,
+
+    //Label/Name/Title
+    var label: String = "",
+
+    //Brand of the tag
+    var brand: String = "",
+
     //Barcode
     var barcode: String = "",
 
     //Format of the barcode
     var barcodeFormat: String = "",
-
-    //Label/Name/Title
-    var label: String = "",
-
-    //TODO ADD IT TO THE DB
-    //Brand of the tag
-    var brand: String = "",
 
     //default price
     var defaultPrice:Double = 0.0,
@@ -27,11 +28,14 @@ data class ItemTag (
     //Item category ie food drinks alc etc..
     var category: String = "",
 
+    //ByteArray representing the image
     var imageByteArray:ByteArray = ByteArray(0),
 
+    //ImageURL
     var imageURL: String = "",
 
     var note: String = "",
 
     var priceTags: MutableList<PriceTag>? = null,
+
 )

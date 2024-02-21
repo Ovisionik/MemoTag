@@ -15,7 +15,6 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
 
-        android:backgroundTint="@color/black"
         app:layout_constraintLeft_toRightOf="parent"
         app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -37,6 +36,7 @@
                 android:inputType="text"
                 android:maxLines="1"
                 android:selectAllOnFocus="true"
+                android:autofillHints="name"
                 android:hint="Search"
                 android:textColorHint="?attr/colorOnSecondary"
                 android:padding="2dp"

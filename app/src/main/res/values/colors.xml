@@ -6,4 +6,10 @@
     <color name="light_orange">#FFF8A30D</color>
     <color name="light_gray">#CCCCCC</color>
     <color name="red">#ff0000</color>
+
+    <color name="colorPrimary">#7f3e98</color>
+    <color name="colorPrimaryDark">#3D2B4F</color>
+    <color name="colorAccent">#F2CEE6</color>
+    <color name="skyAzure">#EDFDFC</color>
+
 </resources>

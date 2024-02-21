@@ -6,8 +6,6 @@ import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.ovisionik.memotag.data.ItemTag
-
-
 class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
     /* context = */ mContext,
     /* name = */ DB_NAME,
@@ -240,6 +238,7 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
             } while ((cursor.moveToNext()))
         }
 
+        cursor.close()
         db.close()
 
         return if (itemTag.id == -1)
@@ -253,7 +252,7 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
      */
     fun findTagByBarcode(barcode: String): ItemTag? {
 
-        val itemTag:ItemTag = ItemTag()
+        val itemTag = ItemTag()
 
         val db = this.readableDatabase
 

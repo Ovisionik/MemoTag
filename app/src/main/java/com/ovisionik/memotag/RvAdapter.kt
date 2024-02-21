@@ -20,7 +20,6 @@ import java.text.DecimalFormat
 class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapter.ViewHolder>(), Filterable {
 
     var filteredTags: ArrayList<ItemTag> = ArrayList()
-
     init {
         filteredTags = items as ArrayList<ItemTag>
     }
@@ -78,14 +77,13 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                 }
             }
             popupMenu.show()
-            true
         }
 
         //On item click logic
         holder.itemView.setOnClickListener{ view ->
 
             val context = view.context
-            val intent = Intent(context, EditTagActivity::class.java).also {
+            Intent(context, EditTagActivity::class.java).also {
                 it.putExtra("itemID", mItemTag.id)
                 context.startActivity(it)
                 notifyItemChanged(position)
@@ -96,27 +94,27 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        var tvTitle     : TextView
-        var tvID        : TextView
-        var tvBarcode   : TextView
-        var tvBrand     : TextView
-        var tvCategory  : TextView
-        var tvPrice     : TextView
-        var tvDate      : TextView
-        var ivTagImage  : ImageView
+        private var tvTitle     : TextView
+        private var tvID        : TextView
+        private var tvBarcode   : TextView
+        private var tvBrand     : TextView
+        private var tvCategory  : TextView
+        private var tvPrice     : TextView
+        private var tvDate      : TextView
+        private var ivTagImage  : ImageView
 
         var btnMoreOption : ImageView
 
         init {
-            tvID = itemView.findViewById(R.id.id_value)
-            tvTitle = itemView.findViewById(R.id.cv_label_value)
-            tvBrand = itemView.findViewById(R.id.brand_value)
-            tvBarcode = itemView.findViewById(R.id.barcode_value)
-            tvCategory = itemView.findViewById(R.id.category_value)
-            tvPrice = itemView.findViewById(R.id.cv_price_value)
-            tvDate = itemView.findViewById(R.id.cv_date_value)
-            ivTagImage = itemView.findViewById(R.id.cv_tag_image_value)
-            btnMoreOption = itemView.findViewById(R.id.cv_more_option)
+            tvID            = itemView.findViewById(R.id.id_value)
+            tvTitle         = itemView.findViewById(R.id.cv_label_value)
+            tvBrand         = itemView.findViewById(R.id.brand_value)
+            tvBarcode       = itemView.findViewById(R.id.barcode_value)
+            tvCategory      = itemView.findViewById(R.id.category_value)
+            tvPrice         = itemView.findViewById(R.id.cv_price_value)
+            tvDate          = itemView.findViewById(R.id.cv_date_value)
+            ivTagImage      = itemView.findViewById(R.id.cv_tag_image_value)
+            btnMoreOption   = itemView.findViewById(R.id.cv_more_option)
         }
 
         fun bindToView(tag: ItemTag){
