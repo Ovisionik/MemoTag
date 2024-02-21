@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -32,7 +33,7 @@ import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 
 
-class ViewItemTagActivity : AppCompatActivity() {
+class EditTagActivity : AppCompatActivity() {
 
     var showBarcode: Boolean = false
 
@@ -68,7 +69,7 @@ class ViewItemTagActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_tag_view)
+        setContentView(R.layout.activity_edit_item_tag)
 
         //init database
         db = DatabaseHelper(this)
@@ -76,16 +77,43 @@ class ViewItemTagActivity : AppCompatActivity() {
         //Get a scraper
         scraper = BarcodeScraper()
 
-        //Get extra tag id
+        mItemTag = ItemTag()
+
+        //get possible the extras
         val iID = intent.getIntExtra("itemID", -1)
-        val itemTag = db.findItemTagByID(iID)
-        if (itemTag == null)
-        {
-            Toast.makeText(this, "no such item exists", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+        val barcode = intent.getStringExtra("itemCode")
+        val codeFormat = intent.getStringExtra("codeFormatName")
+
+        if (iID != -1){
+            //If it's not on the db found return
+            val  itemTag = db.findItemTagByID(iID)
+
+            //Found the item?
+            if (itemTag != null){
+                mItemTag = itemTag
+            }else{
+                //They got us good they gave a fake ID wp me (go fix the code)
+                Log.wtf(
+                    "Fake ID",
+                    "This should not happened, intent.getIntExtra(\"itemID\", -1) returned an id that was not from db"
+                )
+                finish()
+                return
+            }
         }
-        mItemTag = itemTag
+        else{
+            if (barcode.isNullOrBlank()){
+                Toast.makeText(this, "Error no barcode to work with", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
+
+            val itemTag = ItemTag()
+                itemTag.barcode = barcode
+                itemTag.barcodeFormat = codeFormat?: ""
+
+            mItemTag= itemTag
+        }
 
         //Get fields
         tv_price_tags_label = findViewById(R.id.tv_PriceTags_label)
@@ -104,7 +132,6 @@ class ViewItemTagActivity : AppCompatActivity() {
 
         //Set/Update view
         updateViews()
-
 
         iv_ImageDisplay.setOnClickListener{
             picPreview.launch()
@@ -126,7 +153,7 @@ class ViewItemTagActivity : AppCompatActivity() {
 
                 result.onFailure {
                     launch(Dispatchers.Main) {
-                        Toast.makeText(this@ViewItemTagActivity, "${it.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@EditTagActivity, "${it.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -134,11 +161,11 @@ class ViewItemTagActivity : AppCompatActivity() {
                     if (scrap == null)
                         return@launch
 
-                    //Fill only if empty
-                    if (mItemTag.label.isEmpty())       { mItemTag.label    = scrap.label       }
-                    if (mItemTag.brand.isEmpty())       { mItemTag.brand    = scrap.brand       }
-                    if (mItemTag.category.isEmpty())    { mItemTag.category = scrap.category    }
-                    if (mItemTag.imageURL.isEmpty())    { mItemTag.imageURL = scrap.imageURL    }
+                    //Fill only if blank(empty or white space)
+                    if (mItemTag.label.isBlank())       { mItemTag.label    = scrap.label       }
+                    if (mItemTag.brand.isBlank())       { mItemTag.brand    = scrap.brand       }
+                    if (mItemTag.category.isBlank())    { mItemTag.category = scrap.category    }
+                    if (mItemTag.imageURL.isBlank())    { mItemTag.imageURL = scrap.imageURL    }
 
                     async{
                         //Add store the image from url to the bitarray if it was empty
@@ -169,7 +196,14 @@ class ViewItemTagActivity : AppCompatActivity() {
                 mItemTag.defaultPrice = et_defaultPrice.text.toString().toDouble()
             }
 
-            db.updateTag(mItemTag)
+            //If exists update else create
+            if (db.tagExists(mItemTag)){
+                db.updateTag(mItemTag)
+            }
+            else{
+                db.insertItemTag(mItemTag)
+            }
+
             super.onResume()
             finish()
         }
@@ -185,33 +219,39 @@ class ViewItemTagActivity : AppCompatActivity() {
 
         lifecycleScope.launch(Dispatchers.Main) {
 
-            var toggleSymbol:String = "◈"
+            var toggleSymbol:String = "❖"
 
-            if (!showBarcode && mItemTag.imageByteArray.isNotEmpty()){
+            if (!showBarcode){
                 //Item picture display
-                toggleSymbol = "❖"
-                iv_ImageDisplay.setImageBitmap(
-                mItemTag.imageByteArray.toBitmap())
+                toggleSymbol = "◈"
+
+                //Show imageIf it's was stored or a drawable
+                if (mItemTag.imageByteArray.isNotEmpty())
+                {
+                    iv_ImageDisplay.setImageBitmap(
+                        mItemTag.imageByteArray.toBitmap())
+                }else{
+                    iv_ImageDisplay.setImageResource(R.drawable.ic_add_a_photo)
+                }
             }
 
+            //barcode
             tv_barcode.text = mItemTag.barcode.plus(" $toggleSymbol")
 
+            //label
             et_label.hint = mItemTag.label
 
+            //brand
+            et_brand.hint = mItemTag.brand
+
+            //price
             et_defaultPrice.hint = getPriceFormattedString(mItemTag.defaultPrice)
 
+            //date
             tv_tag_date.hint = mItemTag.createdOn
-
-            et_brand.hint = mItemTag.brand
         }
     }
 
-    private fun Bitmap.toByteArray(): ByteArray {
-        val stream = ByteArrayOutputStream()
-        this.compress(Bitmap.CompressFormat.PNG, 100, stream)
-
-        return stream.toByteArray()
-    }
     private fun toggleItemDisplay() {
         showBarcode = !showBarcode
 
@@ -249,7 +289,7 @@ class ViewItemTagActivity : AppCompatActivity() {
                         bmp.setPixel(x,y, if (bitMatrix[x,y]) Color.BLACK else Color.WHITE)
                     }
                 }
-                if (showBarcode){ tv_barcode.text = mItemTag.barcode.plus( " ◈") }
+                if (showBarcode){ tv_barcode.text = mItemTag.barcode.plus( " ❖") }
                 iv_ImageDisplay.setImageBitmap(bmp)
 
             }catch (err : WriterException){
@@ -296,7 +336,12 @@ class ViewItemTagActivity : AppCompatActivity() {
 
         return Bitmap.createBitmap(this, midW.toInt(), midH.toInt(), desPxW.toInt(), desPxH.toInt())
     }
+    private fun Bitmap.toByteArray(): ByteArray {
+        val stream = ByteArrayOutputStream()
+        this.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
+        return stream.toByteArray()
+    }
     fun ByteArray.toBitmap(): Bitmap {
         return BitmapFactory.decodeByteArray(this, 0, this.size)
     }

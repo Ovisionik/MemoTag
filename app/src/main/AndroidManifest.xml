@@ -28,13 +28,8 @@
             android:name=".ScanQRCodeActivity"
             android:exported="false" />
         <activity
-            android:name=".ViewItemTagActivity"
+            android:name=".EditTagActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".CreateItemTagActivity"
-            android:exported="false"
-            android:label="@string/register_tag_title"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"

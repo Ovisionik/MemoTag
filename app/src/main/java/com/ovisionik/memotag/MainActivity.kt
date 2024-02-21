@@ -20,11 +20,11 @@ class MainActivity : AppCompatActivity() {
 
     //FILTERED ITEMS
 
-    lateinit var db : DatabaseHelper
+    private lateinit var db : DatabaseHelper
 
-    lateinit var recyclerViewTags: RecyclerView
+    private lateinit var recyclerViewTags: RecyclerView
 
-    lateinit var tagAdapter: RvAdapter
+    private lateinit var tagAdapter: RvAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         if (db.tagBarcodeExists(barCode)){
 
             //Edit the the one that exists
-            Intent(this, ViewItemTagActivity::class.java).also {
+            Intent(this, EditTagActivity::class.java).also {
                 it.putExtra("itemID", db.findTagByBarcode(barCode)?.id) //.id not .label fml
                 startActivity(it)
             }
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         }else{
 
             //Create a new tag
-            Intent(this, CreateItemTagActivity::class.java).also {
+            Intent(this, EditTagActivity::class.java).also {
                 it.putExtra("itemCode", barCode)
                 it.putExtra("codeFormatName", codeFormat)
                 startActivity(it)

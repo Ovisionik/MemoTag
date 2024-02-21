@@ -13,7 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 
-public class ScanQRCodeActivity : AppCompatActivity() {
+class ScanQRCodeActivity : AppCompatActivity() {
 
     private var mFormatName = ""
 

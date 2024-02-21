@@ -3,6 +3,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 data class ItemTag (
+
     var id: Int = -1,
     //Barcode
     var barcode: String = "",
@@ -33,7 +34,4 @@ data class ItemTag (
     var note: String = "",
 
     var priceTags: MutableList<PriceTag>? = null,
-){
-
-
-}
+)
