@@ -2,7 +2,6 @@ package com.ovisionik.memotag
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -11,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
@@ -27,13 +27,15 @@ import com.google.zxing.oned.Code128Writer
 import com.google.zxing.oned.EAN13Writer
 import com.google.zxing.oned.EAN8Writer
 import com.google.zxing.qrcode.QRCodeWriter
+import com.ovisionik.memotag.Utils.BitmapUtils.CompressTo1MIO
+import com.ovisionik.memotag.Utils.BitmapUtils.toBitmap
+import com.ovisionik.memotag.Utils.BitmapUtils.toByteArray
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import com.ovisionik.memotag.scraper.BarcodeScraper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 
 
@@ -59,7 +61,7 @@ class EditTagActivity : AppCompatActivity() {
     //button views//
     private lateinit var btnSave            :Button
     private lateinit var btnClose           :Button
-    private lateinit var btnWebSearch       :Button
+    private lateinit var btnWebSearch       : ImageButton
 
     private fun initVar() {
 
@@ -165,7 +167,7 @@ class EditTagActivity : AppCompatActivity() {
             // Start a coroutine in the IO context
             lifecycleScope.launch(Dispatchers.IO){
 
-                val result = async { scraper.asyncGetItemScrap(mItemTag.barcode) }.await()
+                val result = async { scraper.getItemScrapAsync(mItemTag.barcode) }.await()
 
                 result.onFailure {
                     launch(Dispatchers.Main) {
@@ -175,16 +177,23 @@ class EditTagActivity : AppCompatActivity() {
 
                 result.onSuccess { scrap ->
                     //Fill only if blank(empty or white space)
-                    if (mItemTag.label.isBlank())       { mItemTag.label    = scrap.label       }
-                    if (mItemTag.brand.isBlank())       { mItemTag.brand    = scrap.brand       }
+                    if (etLabel.text.isBlank())       { mItemTag.label    = scrap.label       }
+                    if (etBrand.text.isBlank())       { mItemTag.brand    = scrap.brand       }
                     if (mItemTag.category.isBlank())    { mItemTag.category = scrap.category    }
                     if (mItemTag.imageURL.isBlank())    { mItemTag.imageURL = scrap.imageURL    }
 
                     async{
                         //Add store the image from url to the bitarray if it was empty
-                        scraper.asyncGetBitmapFromURL(scrap.imageURL).onSuccess { bmp ->
+                        scraper.getBitmapFromUrlAsync(scrap.imageURL).onSuccess { bmp ->
+
+                            //If mItemTag doesn't have a ByteArray
                             if (mItemTag.imageByteArray.isEmpty()){
-                                mItemTag.imageByteArray = bmp.toByteArray()
+
+                                //compress it to at least 1mio
+                                val cBmp = bmp.CompressTo1MIO()
+
+                                //Finally add it to ItemTag's imageByteArray
+                                mItemTag.imageByteArray = cBmp.toByteArray()
                             }
                         }
                     }.await()
@@ -237,16 +246,24 @@ class EditTagActivity : AppCompatActivity() {
         tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode)"◈" else "❖")
 
         //label
-        etLabel.hint = mItemTag.label
+        if (mItemTag.label.isNotBlank())
+        {
+            etLabel.hint = mItemTag.label
+            etLabel.setText(etLabel.hint)
+        }
 
         //brand
-        etBrand.hint = mItemTag.brand
+        if (mItemTag.brand.isNotBlank())
+        {
+            etBrand.hint = mItemTag.brand
+            etBrand.setText(etBrand.hint)
+        }
 
         //price
         etDefaultPrice.hint = getPriceFormattedString(mItemTag.defaultPrice)
 
         //date
-        tvTagCreationDate.hint = mItemTag.createdOn
+        tvTagCreationDate.text = mItemTag.createdOn
     }
 
     private fun toggleItemDisplay() {
@@ -332,6 +349,10 @@ class EditTagActivity : AppCompatActivity() {
                 ivImageDisplay.setImageBitmap(
                     mItemTag.imageByteArray.toBitmap())
             }else{
+                //From Url
+
+
+
                 //if there is still no image show the place holder
                 ivImageDisplay.setImageResource(R.drawable.ic_add_a_photo)
             }
@@ -365,15 +386,6 @@ class EditTagActivity : AppCompatActivity() {
         val midH = this.height/2 - desPxH/2
 
         return Bitmap.createBitmap(this, midW.toInt(), midH.toInt(), desPxW.toInt(), desPxH.toInt())
-    }
-    private fun Bitmap.toByteArray(): ByteArray {
-        val stream = ByteArrayOutputStream()
-        this.compress(Bitmap.CompressFormat.PNG, 100, stream)
-
-        return stream.toByteArray()
-    }
-    private fun ByteArray.toBitmap(): Bitmap {
-        return BitmapFactory.decodeByteArray(this, 0, this.size)
     }
 
     private fun isOnline(context: Context): Boolean {

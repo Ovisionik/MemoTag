@@ -1,7 +1,17 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <!-- Base application theme. -->
     <style name="Base.Theme.MemoTag" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+        <!--Font-->
+        <item name="fontFamily" type="font">@font/sansita_regular</item>
+
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/light_gray</item>
+        <item name="android:textColor">@color/primaryTextLight</item>
+        <item name="android:buttonTint">@color/primary</item>
+
     </style>
+
 </resources>

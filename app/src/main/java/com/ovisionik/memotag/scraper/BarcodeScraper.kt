@@ -19,7 +19,7 @@ class BarcodeScraper {
      * returns a ItemTag if found
      * returns null if not found
      */
-    suspend fun asyncGetItemScrap(barcode:String): Result<ItemTag> = withContext(Dispatchers.IO){
+    suspend fun getItemScrapAsync(barcode:String): Result<ItemTag> = withContext(Dispatchers.IO){
 
         if (isBusy){
             Log.d("isBusy", "getProductValues is already in progress")
@@ -112,7 +112,7 @@ class BarcodeScraper {
         return@withContext Result.success(mItemTag)
     }
 
-    suspend fun asyncGetBitmapFromURL(src: String?): Result<Bitmap> = withContext(Dispatchers.IO) {
+    suspend fun getBitmapFromUrlAsync(src: String?): Result<Bitmap> = withContext(Dispatchers.IO) {
         var bmp:Bitmap?
         try {
             val url = URL(src)

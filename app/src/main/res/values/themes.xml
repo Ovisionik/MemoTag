@@ -3,7 +3,9 @@
     <style name="Base.Theme.MemoTag" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="fontFamily" type="font">@font/sansita_regular</item>
+
     </style>
 
-    <style name="Theme.MemoTag" parent="Base.Theme.MemoTag" />
 </resources>

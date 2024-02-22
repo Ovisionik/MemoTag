@@ -7,9 +7,16 @@
     <color name="light_gray">#CCCCCC</color>
     <color name="red">#ff0000</color>
 
-    <color name="colorPrimary">#7f3e98</color>
-    <color name="colorPrimaryDark">#3D2B4F</color>
-    <color name="colorAccent">#F2CEE6</color>
-    <color name="skyAzure">#EDFDFC</color>
+
+    <color name="primaryDarker">#0A051C</color>
+    <color name="primaryDark">#1F1649</color>
+    <color name="primary">#3D3175</color>
+    <color name="primaryLight">#6355A2</color>
+    <color name="primaryLighter">#9A8AD9</color>
+
+    <color name="colorAccent">#236167</color>
+    <color name="colorAccentAlt">#78286B</color>
+
+    <color name="primaryTextLight">#DCDCE3</color>
 
 </resources>

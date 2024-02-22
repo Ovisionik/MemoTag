@@ -59,8 +59,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         ivSearchBtn.setOnClickListener{
-            val search = etFilterList.text
-            tagAdapter.filter.filter(search)
+            if (etFilterList.text.isNullOrBlank()){
+                etFilterList.requestFocus()
+            }
+            else
+            tagAdapter.filter.filter(etFilterList.text)
         }
 
         //Scan button
