@@ -4,14 +4,22 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
 
-        <!--Font-->
-        <item name="fontFamily" type="font">@font/sansita_regular</item>
+        <item name="android:windowBackground">@drawable/bg_sample_fragmented_dark</item>
 
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textColorHint">@color/light_gray</item>
-        <item name="android:textColor">@color/primaryTextLight</item>
-        <item name="android:buttonTint">@color/primary</item>
+        <item name="editTextStyle">@style/MemoTagEditTextStyle</item>
+        <item name="android:textViewStyle">@style/MemoTagTextViewStyle</item>
 
     </style>
 
+    <style name="MemoTagEditTextStyle" parent="android:Widget.EditText">
+        <item name="android:textColorHint">@color/secondary</item>
+        <item name="android:textColor">@color/tertiary</item>
+    </style>
+
+    <style name="MemoTagTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:textColorHint">@color/secondary</item>
+        <item name="android:textColor">@color/tertiary</item>
+    </style>
+
 </resources>
+

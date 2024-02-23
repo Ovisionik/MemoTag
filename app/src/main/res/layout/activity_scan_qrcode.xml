@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -19,15 +20,16 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@drawable/qrcode_scan" />
+            android:src="@drawable/qrcode_scan"
+            />
 
         <TextView
             android:id="@+id/code_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:textColor="?attr/colorPrimary"
-            android:text="RESULT"
+            android:textColor="@color/quaternary"
+            android:text="@string/scanned_result_indicator"
             android:textSize="26sp"
             android:textStyle="bold"
             />
@@ -41,7 +43,7 @@
         android:layout_height="wrap_content"
 
         android:layout_gravity="bottom"
-        android:backgroundTint="@color/cadmium_violet"
+        android:backgroundTint="@color/quaternary"
 
         app:layout_anchorGravity="center|bottom"
 
@@ -53,13 +55,12 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
 
         android:id="@+id/fab_check"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:contentDescription="@string/ok_btn_description"
         android:layout_gravity="end|bottom"
-
         android:src="@drawable/ic_check_circle"
+        android:backgroundTint="@color/quaternary"
         android:layout_margin="20dp"
         app:fabCustomSize="40dp"
         app:maxImageSize="60dp"
@@ -67,28 +68,25 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_cancel"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:contentDescription="@string/cancel_btn_description"
         android:layout_gravity="start|bottom"
         android:src="@drawable/ic_cancel_circle"
-
+        android:backgroundTint="@color/quaternary"
         android:layout_margin="20dp"
         app:fabCustomSize="40dp"
         app:maxImageSize="60dp"
         />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-
         android:id="@+id/fab_redo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/redo_btn_description"
         android:src="@drawable/ic_change_circle"
-
         android:layout_gravity="center|bottom"
-        android:backgroundTint="@color/white"
-
+        android:backgroundTint="@color/quaternary"
         android:layout_margin="20dp"
         app:fabCustomSize="40dp"
         app:maxImageSize="60dp"

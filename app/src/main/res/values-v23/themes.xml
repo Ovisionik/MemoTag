@@ -4,5 +4,9 @@
     <item name="android:navigationBarColor">@android:color/transparent</item>
     <item name="android:statusBarColor">@android:color/transparent</item>
     <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+
+    <!--Font (Light/Dark)-->
+    <item name="fontFamily" type="font">@font/sansita_regular</item>
+
   </style>
 </resources>

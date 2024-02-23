@@ -1,0 +1,37 @@
+<resources>
+
+    <!--Item Tag related-->
+    <string name="id_indicator">ID</string>
+    <string name="label_indicator">Label</string>
+    <string name="brand_indicator">Brand</string>
+    <string name="barcode_indicator">Barcode</string>
+    <string name="category_indicator">Category</string>
+    <string name="price_indicator">Price</string>
+    <string name="date_indicator">Created on</string>
+    <string name="price_tags_indicator">Price Tags</string>
+    <string name="blank_text"> </string>
+
+    <!--Main Activity-->
+    <string name="search_indicator">Search</string>
+    <string name="filter_context_description">Filter the list</string>
+
+    <!--activity_scan_qrcode-->
+    <string name="scanned_result_indicator">RESULT</string>
+
+    <!--EditTagActivity-->
+    <string name="save_text">Save</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="web_scrap_text">Web Scrap</string>
+    <string name="price_hint_default">1.50 €</string>
+    <string name="image_view_description">Items picture display</string>
+
+    <!--View Descriptions-->
+    <string name="card_view_more_option_description">Card view options</string>
+    <string name="card_view_image_description">Product Image</string>
+
+    <string name="cancel_btn_description">Cancel</string>
+    <string name="redo_btn_description">Redo</string>
+    <string name="ok_btn_description">OK</string>
+
+
+</resources>

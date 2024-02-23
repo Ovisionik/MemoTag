@@ -20,11 +20,12 @@ class MainActivity : AppCompatActivity() {
 
     //FILTERED ITEMS
 
-    private lateinit var db : DatabaseHelper
+    private lateinit var db: DatabaseHelper
 
     private lateinit var recyclerViewTags: RecyclerView
 
     private lateinit var tagAdapter: RvAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,23 +59,23 @@ class MainActivity : AppCompatActivity() {
             false
         }
 
-        ivSearchBtn.setOnClickListener{
-            if (etFilterList.text.isNullOrBlank()){
+        ivSearchBtn.setOnClickListener {
+            if (etFilterList.text.isNullOrBlank()) {
                 etFilterList.requestFocus()
-            }
-            else
-            tagAdapter.filter.filter(etFilterList.text)
+            } else
+                tagAdapter.filter.filter(etFilterList.text)
         }
 
         //Scan button
         val fabCameraScan = findViewById<FloatingActionButton>(R.id.fab_scan_barcode)
 
         //Setup a barcode picker so get back info from the ScanQRCodeActivity
-        val barCodePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ values ->
-            cameraScan(values)
-        }
+        val barCodePicker =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { values ->
+                cameraScan(values)
+            }
 
-        fabCameraScan.setOnClickListener{
+        fabCameraScan.setOnClickListener {
             val intent = Intent(this, ScanQRCodeActivity::class.java)
             barCodePicker.launch(intent)
         }
@@ -87,21 +88,20 @@ class MainActivity : AppCompatActivity() {
         val dbTags = db.getAllTags().reversed()
 
         //update the adapter only if the number of items are different
-        if (tagAdapter.filteredTags.hashCode() != dbTags.hashCode()){
+        if (tagAdapter.filteredTags.hashCode() != dbTags.hashCode()) {
 
             //Check size if it's the same only item needs to update
-            if (tagAdapter.filteredTags.size == dbTags.size){
+            if (tagAdapter.filteredTags.size == dbTags.size) {
 
                 val filTags = tagAdapter.filteredTags
-                for (i in dbTags.indices){
-                    if (dbTags[i].id == filTags[i].id && dbTags[i].hashCode() != filTags[i].hashCode()){
+                for (i in dbTags.indices) {
+                    if (dbTags[i].id == filTags[i].id && dbTags[i].hashCode() != filTags[i].hashCode()) {
                         //item changed
                         tagAdapter.filteredTags[i] = dbTags[i]
                         recyclerViewTags.adapter?.notifyItemChanged(i)
                     }
                 }
-            }
-            else{
+            } else {
                 //We could check and update each individual item
 
                 //... or update everything in the list
@@ -110,6 +110,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     //Setup a barcode picker so get back info from the ScanQRCodeActivity
     private fun cameraScan(values: ActivityResult) {
         val intent = values.data
@@ -118,23 +119,19 @@ class MainActivity : AppCompatActivity() {
         val barCode = intent?.getStringExtra("itemCode")
 
         //Error
-        if (barCode.isNullOrEmpty())
-        {
+        if (barCode.isNullOrEmpty()) {
             Toast.makeText(this, "Err, no barcode found", Toast.LENGTH_SHORT).show()
             return
         }
 
         //Check barcode if exists edit if not create new
-        if (db.tagBarcodeExists(barCode)){
-
+        if (db.tagBarcodeExists(barCode)) {
             //Edit the the one that exists
             Intent(this, EditTagActivity::class.java).also {
                 it.putExtra("itemID", db.findTagByBarcode(barCode)?.id) //.id not .label fml
                 startActivity(it)
             }
-
-        }else{
-
+        } else {
             //Create a new tag
             Intent(this, EditTagActivity::class.java).also {
                 it.putExtra("itemCode", barCode)

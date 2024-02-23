@@ -8,26 +8,25 @@
     android:layout_marginVertical="2dp"
     android:layout_marginHorizontal="4dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="16dp"
-    >
+    app:cardElevation="16dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/primaryLighter">
+        android:layout_height="match_parent">
 
         <ImageView
-            android:contentDescription="card view option"
+            android:contentDescription="@string/card_view_more_option_description"
             android:id="@+id/cv_more_option"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
             android:rotation="90"
             android:src="@drawable/ic_more_horizontal"
-            app:tint="@color/colorAccentAlt"
+            app:tint="@color/secondary"
             />
 
         <ImageView
+            android:contentDescription="@string/card_view_image_description"
             android:id="@+id/cv_tag_image_value"
             android:layout_margin="10dp"
             android:layout_width="80dp"
@@ -86,7 +85,7 @@
             android:padding="2dp"
             android:layout_below="@+id/cv_label_value"
             android:layout_toEndOf="@id/cv_tag_image_value"
-            android:text="Brand" />
+            android:text="@string/brand_indicator" />
 
         <TextView
             android:id="@+id/brand_value"
@@ -111,7 +110,7 @@
 
             android:layout_toEndOf="@id/cv_tag_image_value"
             android:layout_below="@+id/barcode_indic"
-            android:text="Category" />
+            android:text="@string/category_indicator" />
 
         <TextView
             android:id="@+id/category_value"
@@ -132,7 +131,7 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
 
-            android:text="Barcode"
+            android:text="@string/barcode_indicator"
             android:padding="2dp"
 
             android:layout_toEndOf="@id/cv_tag_image_value"
@@ -163,7 +162,7 @@
             android:layout_below="@+id/category_value"
             android:layout_toEndOf="@id/cv_tag_image_value"
 
-            android:text="ID" />
+            android:text="@string/id_indicator" />
 
         <TextView
             android:id="@+id/id_value"
