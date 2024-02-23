@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EditTagActivity"
-    android:background="@color/primaryLighter">
+    tools:context=".EditTagActivity">
 
     <EditText
         android:id="@+id/et_label"
@@ -19,7 +18,7 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:importantForAutofill="no"
-        tools:hint="Label"
+        android:hint="@string/blank_text"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tv_name_indic"
@@ -49,7 +48,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
-        android:hint="Brand"
+        android:hint="@string/brand_indicator"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,13 +63,12 @@
         android:layout_height="40dp"
         android:inputType="textCapWords"
         android:textSize="14sp"
-
+        android:hint="@string/blank_text"
         android:ems="10"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:gravity="start|bottom"
         android:importantForAutofill="no"
-        tools:hint="Brand Name Ltd"
         app:layout_constraintTop_toBottomOf="@+id/tv_brand_indic"
         app:layout_constraintStart_toStartOf="@+id/tv_brand_indic"
         />
@@ -79,7 +79,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="150dp"
-        android:text="Price tags"
+        android:text="@string/price_tags_indicator"
         android:textAlignment="center"
         android:textAllCaps="false"
         android:textIsSelectable="false"
@@ -95,7 +95,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:hint="Name"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:hint="@string/label_indicator"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
@@ -112,12 +114,14 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_PriceTags_label" />
 
     <ImageView
-        android:visibility="invisible"
         android:id="@+id/iv_barcode"
         android:layout_width="match_parent"
         android:layout_height="188dp"
+        android:visibility="invisible"
+        android:contentDescription="@string/image_view_description"
         android:layout_margin="8dp"
-
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -125,13 +129,15 @@
         tools:srcCompat="@drawable/ic_barcode" />
 
     <ImageView
-        android:visibility="visible"
         android:id="@+id/iv_image"
         android:layout_width="match_parent"
         android:layout_height="188dp"
+        android:visibility="visible"
+        android:contentDescription="@string/image_view_description"
         android:layout_margin="8dp"
-
         android:scaleType="fitCenter"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -143,14 +149,15 @@
         android:layout_width="70dp"
         android:layout_height="40dp"
         android:textAlignment="textEnd"
-        android:inputType="number|numberDecimal"
+        android:inputType="numberDecimal"
         android:selectAllOnFocus="true"
+        android:importantForAutofill="no"
         android:padding="0dp"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintRight_toRightOf="@id/tv_price_indic"
         app:layout_constraintTop_toBottomOf="@+id/tv_price_indic"
-        tools:hint="1.20 €"
+        android:hint="@string/price_hint_default"
         />
 
     <TextView
@@ -159,7 +166,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:hint="Price"
+        android:hint="@string/price_indicator"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
@@ -183,7 +190,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="40dp"
-
+        android:contentDescription="@string/web_scrap_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -195,20 +202,26 @@
             android:layout_width="wrap_content"
             android:layout_height="45dp"
             android:layout_gravity="end|center"
-            android:backgroundTint="@color/primaryLight"
             android:focusable="true"
-            android:text="Save"
-            android:textColor="@color/primaryDarker" />
+            android:textSize="16sp"
+
+            android:contentDescription="@string/ok_btn_description"
+            android:text="@string/save_text"
+            android:textColor="@color/primaryTextLight"
+            android:backgroundTint="@color/primaryDark"
+            />
 
         <ImageButton
             android:id="@+id/btn_web_scrap"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_gravity="center"
+            android:contentDescription="@string/web_scrap_text"
             android:background="@drawable/round_shape"
-            android:backgroundTint="@color/primaryLight"
+            app:tint="@color/primaryTextLight"
+            android:backgroundTint="@color/primaryDark"
             android:src="@drawable/ic_download"
-            app:tint="@color/primaryDark" />
+ />
 
         <Button
             android:id="@+id/btn_close"
@@ -216,9 +229,12 @@
             android:layout_height="45dp"
             android:layout_gravity="start|center"
 
-            android:backgroundTint="@color/primaryLight"
-            android:text="Close"
-            android:textColor="@color/primaryDarker" />
+            android:contentDescription="@string/cancel_btn_description"
+            android:textSize="16sp"
+            android:textColor="@color/primaryTextLight"
+            android:backgroundTint="@color/primaryDark"
+            android:text="@string/cancel_text"
+ />
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 

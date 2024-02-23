@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/round_shape"
-                android:backgroundTint="@color/primaryLighter"
+                android:backgroundTint="@color/primaryLight"
                 android:gravity="start|center"
                 android:inputType="text"
                 android:maxLines="1"
@@ -38,8 +38,8 @@
                 android:autofillHints="name"
                 android:paddingStart="20dp"
                 android:paddingEnd="10dp"
-                android:hint="Search"
-                android:textColorHint="@color/primaryDarker"
+                android:hint="@string/search_indicator"
+                android:textColorHint="@color/primaryDark"
                 android:textColor="@color/primaryDarker"
                 android:padding="2dp"
                 android:textSize="20sp" />
@@ -51,8 +51,9 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                app:tint="@color/primary"
+                app:tint="@color/secondary"
 
+                android:contentDescription="@string/filter_context_description"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:src="@drawable/ic_search"/>
@@ -73,11 +74,13 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tagItem_rv"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="65dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:entries="@array/dummyListItems"
-            tools:itemCount="3"
-            tools:listitem="@layout/tag_list_view_item_model" />
+            tools:itemCount="6"
+            tools:listitem="@layout/tag_list_view_item_model"/>
 
     </RelativeLayout>
 

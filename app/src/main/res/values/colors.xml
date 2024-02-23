@@ -8,14 +8,18 @@
     <color name="red">#ff0000</color>
 
 
-    <color name="primaryDarker">#0A051C</color>
-    <color name="primaryDark">#1F1649</color>
-    <color name="primary">#3D3175</color>
-    <color name="primaryLight">#6355A2</color>
-    <color name="primaryLighter">#9A8AD9</color>
 
-    <color name="colorAccent">#236167</color>
-    <color name="colorAccentAlt">#78286B</color>
+    <color name="primaryDarker">#0A1A29</color>
+    <color name="primaryDark">#173451</color>
+    <color name="primary">#3C4655</color>
+    <color name="primaryLight">#44729E</color>
+    <color name="primaryLighter">#6C9FD1</color>
+
+    <color name="secondary">#AEBA39</color>
+    <color name="tertiary">#BE883A</color>
+    <color name="quaternary">#7f3e98</color>
+
+    <color name="colorAccent">#78286B</color>
 
     <color name="primaryTextLight">#DCDCE3</color>
 

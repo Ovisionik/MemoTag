@@ -263,7 +263,7 @@ class EditTagActivity : AppCompatActivity() {
         etDefaultPrice.hint = getPriceFormattedString(mItemTag.defaultPrice)
 
         //date
-        tvTagCreationDate.text = mItemTag.createdOn
+        tvTagCreationDate.hint = mItemTag.createdOn
     }
 
     private fun toggleItemDisplay() {
