@@ -51,7 +51,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                app:tint="@color/secondary"
+                app:tint="@color/primaryDarker"
 
                 android:contentDescription="@string/filter_context_description"
                 android:layout_marginEnd="8dp"
@@ -76,6 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="0dp"
+
             android:layout_marginBottom="65dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:entries="@array/dummyListItems"

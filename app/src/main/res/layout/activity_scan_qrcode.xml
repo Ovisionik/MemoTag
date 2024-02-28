@@ -18,6 +18,7 @@
         android:orientation="vertical">
 
         <ImageView
+            android:id="@+id/iv_code"
             android:contentDescription="@string/scanned_result_indicator"
             android:layout_width="100dp"
             android:layout_height="100dp"
@@ -29,11 +30,52 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:textColor="@color/quaternary"
+            android:textColor="@color/tertiary"
             android:text="@string/scanned_result_indicator"
             android:textSize="26sp"
             android:textStyle="bold"
             />
+
+        <LinearLayout
+            android:id="@+id/ll_indic"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="invisible"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/tv_name_indic_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@string/label_indicator"
+                android:textColor="@color/tertiary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_brand_indic_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/brand_indicator"
+                android:textColor="@color/tertiary"
+                android:textSize="14sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/tv_price_indic_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="@string/price_hint_default"
+                android:textColor="@color/tertiary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+
+        </LinearLayout>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -60,7 +102,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/ok_btn_description"
         android:layout_gravity="end|bottom"
-        android:src="@drawable/ic_check_circle"
+        android:src="@drawable/ic_edit_doc"
         android:backgroundTint="@color/quaternary"
         android:layout_margin="20dp"
         app:fabCustomSize="40dp"
@@ -73,7 +115,8 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/cancel_btn_description"
         android:layout_gravity="start|bottom"
-        android:src="@drawable/ic_cancel_circle"
+        android:rotation="180"
+        android:src="@drawable/ic_exit_to_app"
         android:backgroundTint="@color/quaternary"
         android:layout_margin="20dp"
         app:fabCustomSize="40dp"
@@ -85,7 +128,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/redo_btn_description"
-        android:src="@drawable/ic_change_circle"
+        android:src="@drawable/ic_doc_scan"
         android:layout_gravity="center|bottom"
         android:backgroundTint="@color/quaternary"
         android:layout_margin="20dp"

@@ -1,9 +1,12 @@
 package com.ovisionik.memotag
 
-import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,65 +15,121 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.ovisionik.memotag.data.ItemTag
+import com.ovisionik.memotag.db.DatabaseHelper
+import com.ovisionik.memotag.utils.BitmapUtils.toBitmap
 
 class ScanQRCodeActivity : AppCompatActivity() {
 
     private var mFormatName = ""
-
     private var mScannedCode = ""
+    private var mItemTag = ItemTag()
+
+    private lateinit var fabCancel:FloatingActionButton
+    private lateinit var fabRetake:FloatingActionButton
+    private lateinit var fabOK:FloatingActionButton
+
+    private lateinit var ivImage:ImageView
+    private lateinit var tvTextResult:TextView
+    private lateinit var indicView:LinearLayout
+    private lateinit var labelIndic:TextView
+    private lateinit var brandIndic:TextView
+    private lateinit var dPriceIndic:TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.setVisible(false)
         setContentView(R.layout.activity_scan_qrcode)
 
-        // 3 fabs
-        val fab_cancel = findViewById<FloatingActionButton>(R.id.fab_cancel)
-        val fab_retake = findViewById<FloatingActionButton>(R.id.fab_redo)
-        val fab_ok = findViewById<FloatingActionButton>(R.id.fab_check)
+        ivImage = findViewById(R.id.iv_code)
+        tvTextResult = findViewById(R.id.code_result)
 
-        //Scan Result Indicator
-        val tvTextResult = findViewById<TextView>(R.id.code_result)
+        indicView = findViewById(R.id.ll_indic)
+        labelIndic = findViewById(R.id.tv_name_indic_scan)
+        brandIndic = findViewById(R.id.tv_brand_indic_scan)
+        dPriceIndic = findViewById(R.id.tv_price_indic_scan)
 
-        //Go Back
-        fab_cancel.setOnClickListener{
-            finish()
-        }
-
-        // Open Camera
-        fab_retake.setOnClickListener {
-            checkCameraPermission(this)
-            tvTextResult.text = ""
-        }
-
-        //Create or edit (use) scanned code
-        fab_ok.setOnClickListener{
-            this.intent.putExtra("codeFormatName", mFormatName)
-            this.intent.putExtra("itemCode", mScannedCode)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
-        }
+        //Floating action buttons
+        fabCancel = findViewById(R.id.fab_cancel)
+        fabRetake = findViewById(R.id.fab_redo)
+        fabOK = findViewById(R.id.fab_check)
 
         //Open Camera
         checkCameraPermission(this)
 
-        this.setVisible(true)
+        //Go Back
+        fabCancel.setOnClickListener{
+            Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+
+        // Open Camera
+        fabRetake.setOnClickListener {
+            //Cleanup view
+            resetViews()
+            checkCameraPermission(this)
+
+            this.setVisible(true)
+        }
+
+        //Create or edit (use) scanned code
+        fabOK.setOnClickListener{
+            Intent(this, EditTagActivity::class.java).also{
+                it.putExtra("itemID", mItemTag.id)
+                it.putExtra("codeFormatName", mFormatName)
+                it.putExtra("itemCode", mScannedCode)
+                startActivity(it)
+                finish() //Useless?
+            }
+        }
+    }
+
+    private fun resetViews() {
+        tvTextResult.text = ""
+        ivImage.setImageResource(R.drawable.qrcode_scan)
+        indicView.visibility = View.INVISIBLE
     }
 
     private val barCodeLauncher = registerForActivityResult(ScanContract()){
             result ->
         if (result.contents == null){
-            Toast.makeText(this@ScanQRCodeActivity, "Scan cancelled", Toast.LENGTH_SHORT).show()
-            //Nothing to do exit
+            Toast.makeText(this@ScanQRCodeActivity, "Camera closed", Toast.LENGTH_SHORT).show()
             finish()
         }
         else {
             //Got result
-
             mFormatName = result.formatName
             mScannedCode = result.contents.toString()
 
-            this.findViewById<TextView>(R.id.code_result).text = mScannedCode
+            val tag = ItemTag()
+
+            tag.barcode = mScannedCode
+            tag.barcodeFormat = mFormatName
+
+            mItemTag = DatabaseHelper(this).findTagByBarcode(mScannedCode) ?: tag
+
+            updateViews(mItemTag)
+        }
+    }
+
+    private fun updateViews(it:ItemTag) {
+        tvTextResult.text = it.barcode
+
+        //Set image
+        if (it.imageByteArray.isNotEmpty()) {
+            val bmp = it.imageByteArray.toBitmap()
+            ivImage.setImageBitmap(bmp)
+        }else{
+            ivImage.setImageResource(R.drawable.qrcode_scan)
+        }
+
+        if (it.id != -1){
+            labelIndic.text     = it.label
+            brandIndic.text     = it.brand
+            dPriceIndic.text    = it.moneyString()
+            indicView.visibility = View.VISIBLE
+        }else{
+            indicView.visibility = View.INVISIBLE
         }
     }
 

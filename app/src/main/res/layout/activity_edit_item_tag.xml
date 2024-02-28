@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EditTagActivity">
+    tools:context=".EditTagActivity"
+    >
 
     <EditText
         android:id="@+id/et_label"
@@ -14,7 +15,7 @@
         android:ems="10"
         android:maxLines="1"
         android:selectAllOnFocus="true"
-        android:inputType="textCapWords"
+        android:inputType="textCapSentences"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:importantForAutofill="no"
@@ -61,8 +62,8 @@
         android:id="@+id/et_brand"
         android:layout_width="300dp"
         android:layout_height="40dp"
-        android:inputType="textCapWords"
-        android:textSize="14sp"
+        android:inputType="textCapSentences"
+        android:textSize="16sp"
         android:hint="@string/blank_text"
         android:ems="10"
         android:maxLines="1"
@@ -73,8 +74,9 @@
         app:layout_constraintStart_toStartOf="@+id/tv_brand_indic"
         />
 
-
     <TextView
+        tools:visibility="visible"
+        android:visibility="invisible"
         android:id="@+id/tv_PriceTags_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

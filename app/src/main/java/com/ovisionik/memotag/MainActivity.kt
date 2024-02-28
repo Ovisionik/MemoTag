@@ -6,9 +6,6 @@ import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -69,15 +66,10 @@ class MainActivity : AppCompatActivity() {
         //Scan button
         val fabCameraScan = findViewById<FloatingActionButton>(R.id.fab_scan_barcode)
 
-        //Setup a barcode picker so get back info from the ScanQRCodeActivity
-        val barCodePicker =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { values ->
-                cameraScan(values)
-            }
-
         fabCameraScan.setOnClickListener {
-            val intent = Intent(this, ScanQRCodeActivity::class.java)
-            barCodePicker.launch(intent)
+            Intent(this, ScanQRCodeActivity::class.java).also {
+                startActivity(it)
+            }
         }
     }
 
@@ -110,38 +102,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    //Setup a barcode picker so get back info from the ScanQRCodeActivity
-    private fun cameraScan(values: ActivityResult) {
-        val intent = values.data
-
-        val codeFormat = intent?.getStringExtra("codeFormatName")
-        val barCode = intent?.getStringExtra("itemCode")
-
-        //Error
-        if (barCode.isNullOrEmpty()) {
-            Toast.makeText(this, "Err, no barcode found", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        //Check barcode if exists edit if not create new
-        if (db.tagBarcodeExists(barCode)) {
-            //Edit the the one that exists
-            Intent(this, EditTagActivity::class.java).also {
-                it.putExtra("itemID", db.findTagByBarcode(barCode)?.id) //.id not .label fml
-                startActivity(it)
-            }
-        } else {
-            //Create a new tag
-            Intent(this, EditTagActivity::class.java).also {
-                it.putExtra("itemCode", barCode)
-                it.putExtra("codeFormatName", codeFormat)
-                startActivity(it)
-            }
-        }
-
-        onResume()
-    }
-
 }
 

@@ -1,14 +1,12 @@
 package com.ovisionik.memotag.scraper
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
 import com.ovisionik.memotag.data.ItemTag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
+
 
 class BarcodeScraper {
 
@@ -32,12 +30,6 @@ class BarcodeScraper {
         try {
             Log.d("Scrapper:", "Start - web scrapper is started")
 
-            /*
-            val filDir = filesDir
-            val file = File(filDir, "doc.html")
-            val document = Jsoup.parse(file)
-            */
-
             val scraperBaseUrl = "https://www.barcodelookup.com/"
             val url = scraperBaseUrl+barcode
 
@@ -56,7 +48,7 @@ class BarcodeScraper {
             //val body = document.body().text() // Get the text content of the webpage body
 
             //if not found
-            if (title.contains("Not Found")){
+            if (title.contains("Not Found")) {
                 isBusy = false
                 return@withContext Result.failure(Exception("Product not found"))
             }
@@ -112,20 +104,25 @@ class BarcodeScraper {
         return@withContext Result.success(mItemTag)
     }
 
-    suspend fun getBitmapFromUrlAsync(src: String?): Result<Bitmap> = withContext(Dispatchers.IO) {
-        var bmp:Bitmap?
+    suspend fun googleImageSearch(searchStr:String): String = withContext(Dispatchers.IO){
         try {
-            val url = URL(src)
-            val connection =
-                url.openConnection() as HttpURLConnection
-            connection.doInput = true
-            connection.connect()
-            val input = connection.inputStream
-            bmp = BitmapFactory.decodeStream(input)
-        } catch (e: IOException) {
+            val url = "https://www.google.com/search?tbm=isch&q=${searchStr.replace(" ", "+")}" //Replace " " by +
+            val userAgent ="Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36"
+            val document:Document = Jsoup
+                .connect(url)
+                .userAgent(userAgent)
+                .timeout(3 * 1000)
+                .get()
+
+            val imgTags = document.select("img[alt='']")
+
+            val imgLnk = imgTags.first()?.attr("src")
+
+            return@withContext imgLnk?: ""
+
+        }catch (e: Exception){
             e.printStackTrace()
-            return@withContext Result.failure(e)
+            return@withContext ""
         }
-        return@withContext Result.success(bmp)
     }
 }

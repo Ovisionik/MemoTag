@@ -1,10 +1,9 @@
 package com.ovisionik.memotag
 
-import android.content.Context
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -27,16 +26,18 @@ import com.google.zxing.oned.Code128Writer
 import com.google.zxing.oned.EAN13Writer
 import com.google.zxing.oned.EAN8Writer
 import com.google.zxing.qrcode.QRCodeWriter
-import com.ovisionik.memotag.Utils.BitmapUtils.CompressTo1MIO
-import com.ovisionik.memotag.Utils.BitmapUtils.toBitmap
-import com.ovisionik.memotag.Utils.BitmapUtils.toByteArray
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import com.ovisionik.memotag.scraper.BarcodeScraper
+import com.ovisionik.memotag.utils.AppNetwork.isOnline
+import com.ovisionik.memotag.utils.BitmapUtils.compressTo1MIO
+import com.ovisionik.memotag.utils.BitmapUtils.getBitmapFromUrlAsync
+import com.ovisionik.memotag.utils.BitmapUtils.removeXPercent
+import com.ovisionik.memotag.utils.BitmapUtils.toBitmap
+import com.ovisionik.memotag.utils.BitmapUtils.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.text.DecimalFormat
 
 
 class EditTagActivity : AppCompatActivity() {
@@ -61,7 +62,9 @@ class EditTagActivity : AppCompatActivity() {
     //button views//
     private lateinit var btnSave            :Button
     private lateinit var btnClose           :Button
-    private lateinit var btnWebSearch       : ImageButton
+    private lateinit var btnWebSearch       :ImageButton
+
+    private var cameraIsBusy = false
 
     private fun initVar() {
 
@@ -83,28 +86,31 @@ class EditTagActivity : AppCompatActivity() {
 
     private val picPreview = registerForActivityResult(
         ActivityResultContracts.TakePicturePreview()
-    ){
-            bmp ->
+    ){ bmp ->
+        cameraIsBusy = true
+
         if (bmp != null){
             val resizedBmp = bmp.removeXPercent(0.3,0.3)
-            ivImageDisplay.setImageBitmap(resizedBmp)
-            mItemTag.imageByteArray = resizedBmp.toByteArray()
+            val bmp1 = resizedBmp.compressTo1MIO()
+            ivImageDisplay.setImageBitmap(bmp1)
+            mItemTag.imageByteArray = bmp1.toByteArray()
         }
+
+        cameraIsBusy = false
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_item_tag)
 
+        //get possible the extras
+        val iID = intent.getIntExtra("itemID", -1)
+        val barcode = intent.getStringExtra("itemCode")
+        val codeFormat = intent.getStringExtra("codeFormatName")
 
         //init database
         db = DatabaseHelper(this)
         scraper = BarcodeScraper()
         mItemTag = ItemTag()
-
-        //get possible the extras
-        val iID = intent.getIntExtra("itemID", -1)
-        val barcode = intent.getStringExtra("itemCode")
-        val codeFormat = intent.getStringExtra("codeFormatName")
 
         if (iID != -1){
             //If it's not on the db found return
@@ -134,7 +140,7 @@ class EditTagActivity : AppCompatActivity() {
             itemTag.barcode = barcode
             itemTag.barcodeFormat = codeFormat?: ""
 
-            mItemTag= itemTag
+            mItemTag = itemTag
         }
 
         //Initialize private hooks
@@ -147,11 +153,26 @@ class EditTagActivity : AppCompatActivity() {
         loadImageDisplay(mDisplayBarcode)
 
         ivImageDisplay.setOnClickListener{
-            picPreview.launch()
+
+            if (!cameraIsBusy){
+                picPreview.launch()
+            }
         }
 
         //Toggle Image and Barcode view
         tvBarcode.setOnClickListener { toggleItemDisplay() }
+
+        //Copy the barcode on long-click
+        tvBarcode.setOnLongClickListener{
+            if (tvBarcode.text.isNotBlank()) {
+                val clipboard: ClipboardManager =
+                    getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText(mItemTag.barcode, mItemTag.barcode)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(this, "Copied: ${mItemTag.barcode}", Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
 
         //Close
         btnClose.setOnClickListener { finish() }
@@ -159,52 +180,11 @@ class EditTagActivity : AppCompatActivity() {
         //Scrap product value from the web
         btnWebSearch.setOnClickListener{
 
-            if (!isOnline(this)) {
+            if (isOnline(this)) {
+                Toast.makeText(this, "Experimental", Toast.LENGTH_SHORT).show()
+                webScrap()
+            }else{
                 Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Start a coroutine in the IO context
-            lifecycleScope.launch(Dispatchers.IO){
-
-                val result = async { scraper.getItemScrapAsync(mItemTag.barcode) }.await()
-
-                result.onFailure {
-                    launch(Dispatchers.Main) {
-                        Toast.makeText(this@EditTagActivity, "${it.message}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                result.onSuccess { scrap ->
-                    //Fill only if blank(empty or white space)
-                    if (etLabel.text.isBlank())       { mItemTag.label    = scrap.label       }
-                    if (etBrand.text.isBlank())       { mItemTag.brand    = scrap.brand       }
-                    if (mItemTag.category.isBlank())    { mItemTag.category = scrap.category    }
-                    if (mItemTag.imageURL.isBlank())    { mItemTag.imageURL = scrap.imageURL    }
-
-                    async{
-                        //Add store the image from url to the bitarray if it was empty
-                        scraper.getBitmapFromUrlAsync(scrap.imageURL).onSuccess { bmp ->
-
-                            //If mItemTag doesn't have a ByteArray
-                            if (mItemTag.imageByteArray.isEmpty()){
-
-                                //compress it to at least 1mio
-                                val cBmp = bmp.CompressTo1MIO()
-
-                                //Finally add it to ItemTag's imageByteArray
-                                mItemTag.imageByteArray = cBmp.toByteArray()
-                            }
-                        }
-                    }.await()
-
-                    launch(Dispatchers.Main) {
-                        //Update views
-                        Toast.makeText(applicationContext, "Done", Toast.LENGTH_SHORT).show()
-                        loadImageDisplay(false)
-                        updateViews()
-                    }
-                }
             }
         }
 
@@ -260,28 +240,10 @@ class EditTagActivity : AppCompatActivity() {
         }
 
         //price
-        etDefaultPrice.hint = getPriceFormattedString(mItemTag.defaultPrice)
+        etDefaultPrice.hint = mItemTag.moneyString()
 
         //date
         tvTagCreationDate.hint = mItemTag.createdOn
-    }
-
-    private fun toggleItemDisplay() {
-
-        //!mDisplayBarcode because we are trying to toggle
-        val success = loadImageDisplay(!mDisplayBarcode)
-        if (success) {
-            val toggleSymbolExpand = "❖"
-            val toggleSymbolCollapse = "◈"
-            tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode) toggleSymbolExpand else toggleSymbolCollapse)
-
-            //Toggle the boolean
-            mDisplayBarcode = !mDisplayBarcode
-        }else{
-            //Couldn't load
-            Toast.makeText(this, "Couldn't load the image", Toast.LENGTH_SHORT).show()
-            return
-        }
     }
 
     /**
@@ -352,7 +314,6 @@ class EditTagActivity : AppCompatActivity() {
                 //From Url
 
 
-
                 //if there is still no image show the place holder
                 ivImageDisplay.setImageResource(R.drawable.ic_add_a_photo)
             }
@@ -362,50 +323,73 @@ class EditTagActivity : AppCompatActivity() {
         return true
     }
 
-    private fun getPriceFormattedString(price: Number): String {
-        val df = DecimalFormat("#,###,##0.00")
-        return df.format(price).plus(" €")
+    private fun toggleItemDisplay() {
+
+        //!mDisplayBarcode because we are trying to toggle
+        val success = loadImageDisplay(!mDisplayBarcode)
+        if (success) {
+            val toggleSymbolExpand = "❖"
+            val toggleSymbolCollapse = "◈"
+            tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode) toggleSymbolExpand else toggleSymbolCollapse)
+
+            //Toggle the boolean
+            mDisplayBarcode = !mDisplayBarcode
+        }else{
+            //Couldn't load
+            Toast.makeText(this, "Couldn't load the image", Toast.LENGTH_SHORT).show()
+            return
+        }
     }
 
-    /**
-     * Resize a bitmap to remove x% of it's width/height from the sides
-     * ie i want to crop/reduce the height by 20% -> height: 0.2
-     * double must be between 0.0 and 1.0
-     */
-    private fun Bitmap.removeXPercent(width: Double, height: Double): Bitmap {
+    private fun webScrap() {
+        // Start a coroutine in the IO context
+        lifecycleScope.launch(Dispatchers.IO) {
+            val imgLnk = async { scraper.googleImageSearch(mItemTag.barcode) }.await()
+            if (imgLnk.isNotEmpty()){
+                async { getBitmapFromUrlAsync(imgLnk).onSuccess {
+                    //compress it to at least 1mio
+                    val cBmp = it.compressTo1MIO()
+                    mItemTag.imageByteArray = cBmp.toByteArray()
+                }}.await()
+            }
 
-        if (width > 1 || height > 1) { return this }
-        //input = % to remove, not to keep, so let's get how much we need to cut
-        val keepWidth = 1.0 - width
-        val keepHeight = 1.0 - height
 
-        val desPxW = this.width * keepWidth
-        val desPxH = this.height * keepHeight
+            val result = async { scraper.getItemScrapAsync(mItemTag.barcode) }.await()
 
-        val midW = this.width/2 - desPxW/2
-        val midH = this.height/2 - desPxH/2
+            result.onFailure {
+                launch(Dispatchers.Main) {
+                    Toast.makeText(this@EditTagActivity, "${it.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
 
-        return Bitmap.createBitmap(this, midW.toInt(), midH.toInt(), desPxW.toInt(), desPxH.toInt())
-    }
+            result.onSuccess { scrap ->
+                //Fill only if blank(empty or white space)
+                if (etLabel.text.isBlank())         { mItemTag.label    = scrap.label       }
+                if (etBrand.text.isBlank())         { mItemTag.brand    = scrap.brand       }
+                if (mItemTag.category.isBlank())    { mItemTag.category = scrap.category    }
+                /*
+                                    //if (mItemTag.imageURL.isBlank())    { mItemTag.imageURL = scrap.imageURL    }
+                                    async{
+                                        //If mItemTag doesn't have a ByteArray
+                                        if (mItemTag.imageByteArray.isEmpty()){
 
-    private fun isOnline(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-
-        if (capabilities != null) {
-            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                return true
-            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                return true
-            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-                return true
+                                            //Add store the image from url to the bitarray if it was empty
+                                            getBitmapFromUrlAsync(scrap.imageURL).onSuccess { bmp ->
+                                                //compress it to at least 1mio
+                                                val cBmp = bmp.compressTo1MIO()
+                                                //Finally add it to ItemTag's imageByteArray
+                                                mItemTag.imageByteArray = cBmp.toByteArray()
+                                            }
+                                        }
+                                    }.await()
+                */
+                launch(Dispatchers.Main) {
+                    //Update views
+                    Toast.makeText(applicationContext, "Done", Toast.LENGTH_SHORT).show()
+                    loadImageDisplay(false)
+                    updateViews()
+                }
             }
         }
-        return false
     }
 }

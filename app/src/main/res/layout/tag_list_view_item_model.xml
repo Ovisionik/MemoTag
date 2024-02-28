@@ -5,8 +5,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="130dp"
-    android:layout_marginVertical="2dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="0dp"
     android:layout_marginHorizontal="4dp"
+    android:outlineSpotShadowColor="@color/quaternary"
     app:cardCornerRadius="8dp"
     app:cardElevation="16dp">
 
@@ -26,17 +28,16 @@
             />
 
         <ImageView
-            android:contentDescription="@string/card_view_image_description"
             android:id="@+id/cv_tag_image_value"
-            android:layout_margin="10dp"
             android:layout_width="80dp"
             android:layout_height="120dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="0dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:contentDescription="@string/card_view_image_description"
 
             android:scaleType="centerCrop"
             tools:src="?attr/colorAccent" />
@@ -185,15 +186,13 @@
             android:layout_height="wrap_content"
 
             android:layout_alignParentEnd="true"
-
             android:layout_centerInParent="true"
 
             android:gravity="center|end"
-
             android:maxWidth="100dp"
             android:padding="8dp"
-            tools:text="12.5 €"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="12.5 €" />
 
     </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

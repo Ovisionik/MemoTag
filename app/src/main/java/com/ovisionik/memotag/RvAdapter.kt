@@ -1,5 +1,6 @@
 package com.ovisionik.memotag
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.view.Gravity
@@ -87,6 +88,7 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                 it.putExtra("itemID", mItemTag.id)
                 context.startActivity(it)
                 notifyItemChanged(position)
+                return@setOnClickListener
             }
         }
         holder.bindToView(mItemTag)
@@ -157,6 +159,8 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                 return filterResults
             }
 
+            @SuppressLint("NotifyDataSetChanged")
+            @Suppress("UNCHECKED_CAST")
             override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
                 filteredTags = results?.values as ArrayList<ItemTag>
                 notifyDataSetChanged()
