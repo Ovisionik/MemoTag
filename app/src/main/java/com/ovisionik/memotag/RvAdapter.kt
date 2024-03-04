@@ -16,7 +16,6 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
-import java.text.DecimalFormat
 
 class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapter.ViewHolder>(), Filterable {
 
@@ -125,13 +124,9 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
             tvBrand.text    = tag.brand
             tvBarcode.text  = tag.barcode
             tvCategory.text = tag.category
-            tvPrice.text    = intoEuroPriceFormat(tag.defaultPrice)
+            tvPrice.text    = tag.moneyString()
             tvDate.text     = tag.createdOn
             ivTagImage.setImageBitmap(BitmapFactory.decodeByteArray(tag.imageByteArray, 0, tag.imageByteArray.size))
-        }
-        fun intoEuroPriceFormat(price:Double) : String {
-            val df = DecimalFormat("#,###,##0.00")
-            return df.format(price).plus(" €")
         }
     }
 

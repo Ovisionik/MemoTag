@@ -1,7 +1,8 @@
 package com.ovisionik.memotag.data
-import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 data class ItemTag (
 
@@ -41,16 +42,15 @@ data class ItemTag (
 
 ){
     fun moneyString(price:Double = defaultPrice):String{
-
-        return getPriceFormattedString(price)
+        return getLocalPriceFormatted(price)
     }
 }
 
-private fun getPriceFormattedString(price: Number): String {
+private fun getLocalPriceFormatted(price: Number): String {
     if (price == 0.0){
         return "???"
     }
 
-    val df = DecimalFormat("#,###,##0.00")
-    return df.format(price).plus(" €")
+    val numberFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
+    return numberFormat.format(price)
 }

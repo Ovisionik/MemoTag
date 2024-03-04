@@ -5,18 +5,12 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-
 object BitmapUtils {
-    const val ONE_KIO = 1024
-    const val ONE_MIO = ONE_KIO * ONE_KIO
-
     suspend fun getBitmapFromUrlAsync(src: String?): Result<Bitmap> = withContext(Dispatchers.IO) {
         val bmp:Bitmap?
         try {
@@ -43,41 +37,6 @@ object BitmapUtils {
         this.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
         return stream.toByteArray()
-    }
-
-
-    /**
-     * Compress, if needed, an image file to be lower than or equal to 1 Mio
-     *
-     * @param filePath Image file path
-     *
-     * @return Stream containing data of the compressed image. Can be null
-     */
-    fun compressedImageFile(filePath: String): InputStream? {
-        var quality = 100
-        var inputStream: InputStream? = null
-        if (filePath.isNotEmpty()) {
-            var bufferSize = Integer.MAX_VALUE
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            try {
-                val bitmap = BitmapFactory.decodeFile(filePath)
-                do {
-                    if (bitmap != null) {
-                        byteArrayOutputStream.reset()
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
-                        bufferSize = byteArrayOutputStream.size()
-                        Log.d("compressedImageFile","quality: $quality -> length: $bufferSize")
-                        quality -= 10
-                    }
-                } while (bufferSize > ONE_MIO)
-                inputStream = ByteArrayInputStream(byteArrayOutputStream.toByteArray())
-                byteArrayOutputStream.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.e("compressedImageFile error", "${e.message}")
-            }
-        }
-        return inputStream
     }
 
     fun Bitmap.compressTo1MIO():Bitmap {

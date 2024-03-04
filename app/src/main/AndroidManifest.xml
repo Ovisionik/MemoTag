@@ -26,7 +26,8 @@
             tools:replace="android:screenOrientation" />
         <activity
             android:name=".ScanQRCodeActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".EditTagActivity"
             android:exported="false"

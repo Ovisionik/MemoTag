@@ -68,7 +68,6 @@ class ScanQRCodeActivity : AppCompatActivity() {
             //Cleanup view
             resetViews()
             checkCameraPermission(this)
-
             this.setVisible(true)
         }
 
@@ -79,8 +78,8 @@ class ScanQRCodeActivity : AppCompatActivity() {
                 it.putExtra("codeFormatName", mFormatName)
                 it.putExtra("itemCode", mScannedCode)
                 startActivity(it)
-                finish() //Useless?
             }
+            finish()
         }
     }
 
@@ -124,12 +123,12 @@ class ScanQRCodeActivity : AppCompatActivity() {
         }
 
         if (it.id != -1){
-            labelIndic.text     = it.label
-            brandIndic.text     = it.brand
-            dPriceIndic.text    = it.moneyString()
-            indicView.visibility = View.VISIBLE
+            labelIndic.text         = it.label
+            brandIndic.text         = it.brand
+            dPriceIndic.text        = it.moneyString()
+            indicView.visibility    = View.VISIBLE
         }else{
-            indicView.visibility = View.INVISIBLE
+            indicView.visibility    = View.INVISIBLE
         }
     }
 
