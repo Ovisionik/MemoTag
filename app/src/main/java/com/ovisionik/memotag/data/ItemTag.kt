@@ -22,7 +22,7 @@ data class ItemTag (
     var barcodeFormat: String = "",
 
     //default price
-    var defaultPrice:Double = 0.0,
+    var defaultPrice: Double = 0.00,
 
     //Tag Creation Date
     var createdOn: String = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").format(LocalDateTime.now()).toString(),
@@ -41,13 +41,13 @@ data class ItemTag (
     var priceTags: MutableList<PriceTag>? = null,
 
 ){
-    fun moneyString(price:Double = defaultPrice):String{
+    fun moneyString(price:Number = defaultPrice):String{
         return getLocalPriceFormatted(price)
     }
 }
 
 private fun getLocalPriceFormatted(price: Number): String {
-    if (price == 0.0){
+    if (price == 0.00){
         return "???"
     }
 

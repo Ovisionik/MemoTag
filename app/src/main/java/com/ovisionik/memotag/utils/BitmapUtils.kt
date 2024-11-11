@@ -11,7 +11,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object BitmapUtils {
-    suspend fun getBitmapFromUrlAsync(src: String?): Result<Bitmap> = withContext(Dispatchers.IO) {
+    suspend fun getBitmapFromUrlAsync(src: String?): Bitmap? = withContext(Dispatchers.IO) {
         val bmp:Bitmap?
         try {
             val url = URL(src)
@@ -23,9 +23,9 @@ object BitmapUtils {
             bmp = BitmapFactory.decodeStream(input)
         } catch (e: IOException) {
             e.printStackTrace()
-            return@withContext Result.failure(e)
+            return@withContext null
         }
-        return@withContext Result.success(bmp)
+        return@withContext bmp
     }
 
     fun ByteArray.toBitmap(): Bitmap {

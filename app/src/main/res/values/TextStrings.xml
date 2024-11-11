@@ -33,5 +33,6 @@
     <string name="redo_btn_description">Redo</string>
     <string name="ok_btn_description">OK</string>
 
+    <string name="delete_indic">Delete</string>
 
 </resources>

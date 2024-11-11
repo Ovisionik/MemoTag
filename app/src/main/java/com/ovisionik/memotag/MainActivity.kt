@@ -1,17 +1,18 @@
 package com.ovisionik.memotag
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,58 +24,115 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tagAdapter: RvAdapter
 
+    private lateinit var toolbar: Toolbar
+    private lateinit var ivSearchBtn: ImageView
+    private lateinit var etFilterList: EditText
+
+    //private var firstLoad: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //init database
-        db = DatabaseHelper(this)
 
-        recyclerViewTags = findViewById<RecyclerView?>(R.id.tagItem_rv)
+//        val elapsed = measureTimeMillis {
+//            Thread.sleep(100)
+//        }
+//
+//        showFragment(ListViewFragment())
+//
+//        Toast.makeText(this, "Created first frag $elapsed", Toast.LENGTH_SHORT).show()
+//
+        //Preload DB
+        db = DatabaseHelper.getInstance(this)
+        Toast.makeText(this, "DB ready", Toast.LENGTH_SHORT).show()
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        val etFilterList = findViewById<EditText>(R.id.et_filter_rv)
-        val ivSearchBtn = findViewById<ImageView>(R.id.iv_search)
-        setSupportActionBar(toolbar)
+        showFragment(ListViewFragment())
 
-        tagAdapter = RvAdapter(ArrayList(db.getAllTags().reversed()))
-        recyclerViewTags.apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = tagAdapter
-        }
+        //Animate loading
 
-        registerForContextMenu(recyclerViewTags)
+//
+//        registerForContextMenu(recyclerViewTags)
+//
+//        etFilterList.setOnEditorActionListener { v, actionId, event ->
+//
+//            if (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER || actionId == EditorInfo.IME_ACTION_DONE) {
+//                //do what you want on the press of 'done'
+//                v.clearFocus()
+//                ivSearchBtn.performClick()
+//            }
+//            false
+//        }
+//
+//        ivSearchBtn.setOnClickListener {
+//
+//            //Search only if...
+//            if (etFilterList.text.isNotBlank() && etFilterList.text.length > 1) {
+//                tagAdapter.filter.filter(etFilterList.text)
+//
+//            } else{
+//                Toast.makeText(this, "search too short: try at least 2 character", Toast.LENGTH_SHORT).show()
+//                //update adapter (reset filter/item view)
+//                updateRvAdapter()
+//                //regain focus
+//                etFilterList.text.clear()
+//                etFilterList.requestFocus()
+//            }
+//        }
+//
+//        //Scan button
+//        val fabCameraScan = findViewById<FloatingActionButton>(R.id.fab_scan_barcode)
+//
+//        fabCameraScan.setOnClickListener {
+//            Intent(this, ScanQRCodeActivity::class.java).also {
+//                startActivity(it)
+//            }
+//        }
+    }
 
-        etFilterList.setOnEditorActionListener { v, actionId, event ->
+    private fun showFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_act_fragment_container, fragment) // Replaces the entire screen content
+            .addToBackStack(null) // Allows the user to go back to MainActivity
+            .commit()
+    }
 
-            if (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER || actionId == EditorInfo.IME_ACTION_DONE) {
-                //do what you want on the press of 'done'
-                v.clearFocus()
-                ivSearchBtn.performClick()
-            }
-            false
-        }
+    private fun openListDisplayFragment() {
+        val fragment = ListViewFragment()
 
-        ivSearchBtn.setOnClickListener {
-            if (etFilterList.text.isNullOrBlank()) {
-                etFilterList.requestFocus()
-            } else
-                tagAdapter.filter.filter(etFilterList.text)
-        }
+        // Begin the fragment transaction
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_act_fragment_container, fragment) // Replaces the entire screen content
+            .addToBackStack(null) // Allows the user to go back to MainActivity
+            .commit()
+    }
+    override fun onResume() {
+        super.onResume()
 
-        //Scan button
-        val fabCameraScan = findViewById<FloatingActionButton>(R.id.fab_scan_barcode)
+        showFragment(ListViewFragment())
 
-        fabCameraScan.setOnClickListener {
-            Intent(this, ScanQRCodeActivity::class.java).also {
-                startActivity(it)
-            }
+        //openListDisplayFragment()
+//        //Update/re-filter
+//        updateRvAdapter()
+//
+//        lazyLoadItemTags();
+//
+//        if (etFilterList.text.isNotBlank()){
+//            ivSearchBtn.performClick()
+//        }
+//
+//        Toast.makeText(this, "asd", Toast.LENGTH_LONG).show();
+    }
+
+    //TODO:
+    private fun lazyLoadItemTags(){
+
+        lifecycleScope.launch(Dispatchers.IO) {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    //TODO: Remove/Adapt to load gradually
+    private fun updateRvAdapter() {
 
         //Update adapter
         val dbTags = db.getAllTags().reversed()
@@ -101,6 +159,18 @@ class MainActivity : AppCompatActivity() {
                 recyclerViewTags.adapter = tagAdapter
             }
         }
+    }
+
+    private fun getDummyItems():ArrayList<ItemTag>{
+        val tagList = ArrayList<ItemTag>()
+        for(i in 0..3){
+            var itm = ItemTag()
+            itm.id = i;
+            itm.label = i.toString();
+            itm.barcode = i.toString();
+            tagList.add(itm);
+        }
+        return  tagList;
     }
 }
 

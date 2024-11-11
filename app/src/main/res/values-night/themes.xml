@@ -4,6 +4,7 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
 
+        <!--TODO:Check load time-->
         <item name="android:windowBackground">@drawable/bg_sample_fragmented_dark</item>
 
         <item name="editTextStyle">@style/MemoTagEditTextStyle</item>

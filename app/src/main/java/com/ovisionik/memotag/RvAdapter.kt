@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
+import java.lang.Double.parseDouble
 
 class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapter.ViewHolder>(), Filterable {
 
@@ -32,10 +33,16 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
 
     override fun getItemCount() = filteredTags.size
 
+    fun setData(newTags: List<ItemTag>) {
+        filteredTags.clear()
+        filteredTags.addAll(newTags)
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val mItemTag = filteredTags[position]
-        val db = DatabaseHelper(holder.itemView.context)
+        val db = DatabaseHelper.getInstance(holder.itemView.context)
 
         holder.itemView.setOnLongClickListener{
             Toast.makeText(it.context, "OnLongClickListener", Toast.LENGTH_SHORT).show()
@@ -61,11 +68,10 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                 e.printStackTrace()
             }
 
-            popupMenu.inflate(R.menu.list_context_menu)
+            popupMenu.inflate(R.menu.delete_popup_menu)
             popupMenu.setOnMenuItemClickListener {
                 when(it.itemId){
                     R.id.delete_item -> {
-
                         if (db.deleteTag(mItemTag)){
                             filteredTags.removeAt(position)
                             notifyItemRemoved(position)
@@ -81,7 +87,6 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
 
         //On item click logic
         holder.itemView.setOnClickListener{ view ->
-
             val context = view.context
             Intent(context, EditTagActivity::class.java).also {
                 it.putExtra("itemID", mItemTag.id)
@@ -144,9 +149,13 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                     return filterResults
                 }
 
+                //Filter
                 val result = items.filter { filter ->
+                    //By label
                     filter.label.lowercase().contains(text)
+                            //By Barcode
                             || filter.barcode.lowercase().contains(text)
+                            || numberEquals(filter.defaultPrice, text)
                 }
 
                 filteredTags = ArrayList(result)
@@ -161,5 +170,16 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
                 notifyDataSetChanged()
             }
         }
+    }
+
+    private fun numberEquals(price: Double, text: String): Boolean {
+
+        val searchNumber = try {
+            parseDouble(text)
+        }catch (err:RuntimeException){
+            return false
+        }
+
+        return searchNumber.equals(price)
     }
 }

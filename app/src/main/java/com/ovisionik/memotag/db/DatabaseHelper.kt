@@ -6,23 +6,35 @@ import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.ovisionik.memotag.data.ItemTag
-class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
-    /* context = */ mContext,
-    /* name = */ DB_NAME,
-    /* factory = */ null,
-    /* version = */ DB_VERSION
-) {
-    // smiler to Static String name = ""
-    companion object{
 
-        //DATABASE
+class DatabaseHelper private constructor(mContext: Context) : SQLiteOpenHelper(
+    mContext,
+    DB_NAME,
+    null,
+    DB_VERSION
+) {
+
+    companion object {
         private const val DB_NAME = "memo_tag.db"
         private const val DB_VERSION = 2
 
-        //TABLES Item Tags
-        private const val ITEM_TAG_TABLE_NAME = "itemTags"
+        // Define the singleton instance variable
+        @Volatile
+        private var INSTANCE: DatabaseHelper? = null
 
-        //Item tag fields
+        // Get the singleton instance of DatabaseHelper
+        fun getInstance(context: Context): DatabaseHelper {
+            // Return the existing instance if it’s already initialized
+            return INSTANCE ?: synchronized(this) {
+                // Create a new instance if it hasn’t been initialized yet
+                val instance = DatabaseHelper(context.applicationContext)
+                INSTANCE = instance
+                instance
+            }
+        }
+
+        // Constants for table and column names
+        private const val ITEM_TAG_TABLE_NAME = "itemTags"
         private const val ITEM_TAG_ID = "ID"
         private const val ITEM_TAG_LABEL = "LABEL"
         private const val ITEM_TAG_BRAND = "BRAND"
@@ -31,11 +43,8 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
         private const val ITEM_TAG_IMAGE_BYTES = "IMAGE_BYTES"
         private const val ITEM_TAG_IMAGE_URL = "IMAGE_URL"
         private const val ITEM_TAG_CATEGORY = "CATEGORY"
-
         private const val ITEM_TAG_PRICE = "PRICE"
         private const val ITEM_TAG_CREATED_ON = "CREATION_DATE"
-
-        //Table Prices Tags
         private const val PRICE_TAG_TABLE_NAME = "tagPrices"
         private const val PRICE_TAG_ID = "ID"
         private const val PRICE_TAG_ITEM_TAG_ID = "ITEM_TAG_ID"
@@ -44,10 +53,10 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
         private const val PRICE_TAG_NOTE = "NOTE"
         private const val PRICE_TAG_CREATED_ON = "CREATION_DATE"
     }
+
+    // onCreate and other methods remain the same
+
     override fun onCreate(db: SQLiteDatabase?) {
-
-        /* Tables creations */
-
         val createTableTags = "CREATE TABLE IF NOT EXISTS $ITEM_TAG_TABLE_NAME (" +
                 "$ITEM_TAG_ID INTEGER PRIMARY KEY, " +
                 "$ITEM_TAG_LABEL VARCHAR(50)," +
@@ -70,23 +79,13 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
                 "$PRICE_TAG_CREATED_ON VARCHAR(20)" +
                 ")"
 
-        //Execute SQL create table commands
-
         db?.execSQL(createTableTags)
         db?.execSQL(createTablePrices)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-
-        //Table deletion
-        //db?.execSQL("DROP TABLE IF EXISTS $ITEM_TAG_TABLE_NAME")
-
-        //Table recreation
-        //onCreate(db)
-
-        //V2 new additions
-        db?.execSQL("ALTER TABLE $ITEM_TAG_TABLE_NAME ADD COLUMN $ITEM_TAG_BRAND VARCHAR(50) DEFAULT''")
-        db?.execSQL("ALTER TABLE $ITEM_TAG_TABLE_NAME ADD COLUMN $ITEM_TAG_IMAGE_URL TEXT DEFAULT''")
+        db?.execSQL("ALTER TABLE $ITEM_TAG_TABLE_NAME ADD COLUMN $ITEM_TAG_BRAND VARCHAR(50) DEFAULT ''")
+        db?.execSQL("ALTER TABLE $ITEM_TAG_TABLE_NAME ADD COLUMN $ITEM_TAG_IMAGE_URL TEXT DEFAULT ''")
     }
 
     /**
@@ -202,6 +201,47 @@ class DatabaseHelper (mContext: Context) : SQLiteOpenHelper (
             it.category = category
 
             tags.add(it)
+        }
+        cursor.close()
+        db.close()
+
+        return tags
+    }
+
+    fun fetchItems(limit: Int, offset: Int): List<ItemTag> {
+        val tags = mutableListOf<ItemTag>()
+        val db = this.readableDatabase
+
+        // Updated query to include LIMIT and OFFSET
+        val query = "SELECT * FROM $ITEM_TAG_TABLE_NAME LIMIT ? OFFSET ?"
+        val cursor = db.rawQuery(query, arrayOf(limit.toString(), offset.toString()))
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(ITEM_TAG_ID))
+            val label = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_LABEL))
+            val brand = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_BRAND))
+            val barcode = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_BARCODE))
+            val barcodeFormat = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_BARCODE_FORMAT))
+            val imageURL = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_IMAGE_URL))
+            val byteArray = cursor.getBlob(cursor.getColumnIndexOrThrow(ITEM_TAG_IMAGE_BYTES))
+            val category = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_CATEGORY))
+            val price = cursor.getDouble(cursor.getColumnIndexOrThrow(ITEM_TAG_PRICE))
+            val createdOn = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_CREATED_ON))
+
+            val itemTag = ItemTag()
+
+            itemTag.id = id
+            itemTag.label = label
+            itemTag.brand = brand
+            itemTag.barcode = barcode
+            itemTag.barcodeFormat = barcodeFormat
+            itemTag.defaultPrice = price
+            itemTag.createdOn = createdOn
+            itemTag.imageURL = imageURL
+            itemTag.imageByteArray = byteArray
+            itemTag.category = category
+
+            tags.add(itemTag)
         }
         cursor.close()
         db.close()

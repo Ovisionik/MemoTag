@@ -7,6 +7,9 @@ import android.util.Log
 
 object AppNetwork {
 
+    /**
+     *A Simple function to check if internet is available
+    **/
     fun isOnline(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

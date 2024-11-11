@@ -60,6 +60,7 @@ class ScanQRCodeActivity : AppCompatActivity() {
         //Go Back
         fabCancel.setOnClickListener{
             Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
+            super.onResume()
             finish()
         }
 
@@ -73,14 +74,19 @@ class ScanQRCodeActivity : AppCompatActivity() {
 
         //Create or edit (use) scanned code
         fabOK.setOnClickListener{
-            Intent(this, EditTagActivity::class.java).also{
-                it.putExtra("itemID", mItemTag.id)
-                it.putExtra("codeFormatName", mFormatName)
-                it.putExtra("itemCode", mScannedCode)
-                startActivity(it)
-            }
-            finish()
+            launchEditTagPage()
         }
+    }
+
+    private fun launchEditTagPage() {
+        Intent(this, EditTagActivity::class.java).also{
+            it.putExtra("itemID", mItemTag.id)
+            it.putExtra("codeFormatName", mFormatName)
+            it.putExtra("itemCode", mScannedCode)
+            startActivity(it)
+        }
+        super.onResume()
+        finish()
     }
 
     private fun resetViews() {
@@ -105,7 +111,7 @@ class ScanQRCodeActivity : AppCompatActivity() {
             tag.barcode = mScannedCode
             tag.barcodeFormat = mFormatName
 
-            mItemTag = DatabaseHelper(this).findTagByBarcode(mScannedCode) ?: tag
+            mItemTag = DatabaseHelper.getInstance(this).findTagByBarcode(mScannedCode) ?: tag
 
             updateViews(mItemTag)
         }

@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EditTagActivity"
-    >
+    tools:context=".EditTagFragment">
 
     <EditText
         android:id="@+id/et_label"
@@ -222,7 +221,7 @@
             app:tint="@color/primaryTextLight"
             android:backgroundTint="@color/primaryDark"
             android:src="@drawable/ic_download"
- />
+            />
 
         <Button
             android:id="@+id/btn_close"
@@ -235,7 +234,7 @@
             android:textColor="@color/primaryTextLight"
             android:backgroundTint="@color/primaryDark"
             android:text="@string/cancel_text"
- />
+            />
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 

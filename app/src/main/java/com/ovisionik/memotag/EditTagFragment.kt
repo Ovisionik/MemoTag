@@ -7,7 +7,9 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -18,7 +20,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.Writer
@@ -40,58 +42,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-
-class EditTagActivity : AppCompatActivity() {
+class EditTagFragment : Fragment() {
 
     private var mDisplayBarcode: Boolean = false
 
-    //Utils//
-    private lateinit var db                 :DatabaseHelper
-    private lateinit var scraper            :ItemTagWebScraper
-    private lateinit var mItemTag           :ItemTag
+    //Utils
+    private lateinit var db: DatabaseHelper
+    private lateinit var scraper: ItemTagWebScraper
+    private lateinit var mItemTag: ItemTag
 
-    // 'normal' Views //
-    private lateinit var ivImageDisplay     :ImageView
-    private lateinit var ivBarcodeDisplay   :ImageView
-    private lateinit var lvPriceTags        :ListView
-    private lateinit var etLabel            :EditText
-    private lateinit var etBrand            :EditText
-    private lateinit var etDefaultPrice     :EditText
-    private lateinit var tvTagCreationDate  :TextView
-    private lateinit var tvBarcode          :TextView
+    // Views
+    private lateinit var ivImageDisplay: ImageView
+    private lateinit var ivBarcodeDisplay: ImageView
+    private lateinit var lvPriceTags: ListView
+    private lateinit var etLabel: EditText
+    private lateinit var etBrand: EditText
+    private lateinit var etDefaultPrice: EditText
+    private lateinit var tvTagCreationDate: TextView
+    private lateinit var tvBarcode: TextView
 
-    //button views//
-    private lateinit var btnSave            :Button
-    private lateinit var btnClose           :Button
-    private lateinit var btnWebSearch       :ImageButton
+    private lateinit var btnSave: Button
+    private lateinit var btnClose: Button
+    private lateinit var btnWebSearch: ImageButton
 
     private var cameraIsBusy = false
 
-    private fun initVar() {
-
-        //--Views--//
-        etLabel = findViewById(R.id.et_label)
-        etBrand = findViewById(R.id.et_brand)
-        tvBarcode = findViewById(R.id.tv_barcode)
-        etDefaultPrice = findViewById(R.id.et_default_price)
-        tvTagCreationDate = findViewById(R.id.tv_tag_date)
-        lvPriceTags = findViewById(R.id.tags_note_lv)
-        ivImageDisplay = findViewById(R.id.iv_image)
-        ivBarcodeDisplay = findViewById(R.id.iv_barcode)
-
-        //--Buttons views--//
-        btnSave = findViewById(R.id.btn_save)
-        btnClose = findViewById(R.id.btn_close)
-        btnWebSearch = findViewById(R.id.btn_web_scrap)
-    }
-
     private val picPreview = registerForActivityResult(
         ActivityResultContracts.TakePicturePreview()
-    ){ bmp ->
+    ) { bmp ->
         cameraIsBusy = true
 
-        if (bmp != null){
-            val resizedBmp = bmp.removeXPercent(0.3,0.3)
+        if (bmp != null) {
+            val resizedBmp = bmp.removeXPercent(0.3, 0.3)
             val bmp1 = resizedBmp.compressTo1MIO()
             ivImageDisplay.setImageBitmap(bmp1)
             mItemTag.imageByteArray = bmp1.toByteArray()
@@ -100,76 +82,84 @@ class EditTagActivity : AppCompatActivity() {
         cameraIsBusy = false
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_item_tag)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return inflater.inflate(R.layout.fragment_edit_tag, container, false)
+    }
 
-        //get possible the extras
-        val iID = intent.getIntExtra("itemID", -1)
-        val barcode = intent.getStringExtra("itemCode")
-        val codeFormat = intent.getStringExtra("codeFormatName")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        //init database
-        db = DatabaseHelper.getInstance(this)
+        // Initialize views
+        initVar(view)
+
+        // Fetch arguments passed to the fragment
+        val iID = arguments?.getInt("itemID", -1) ?: -1
+        val barcode = arguments?.getString("itemCode")
+        val codeFormat = arguments?.getString("codeFormatName")
+
+        // Initialize database and scraper
+        db = DatabaseHelper.getInstance(requireContext())
         scraper = ItemTagWebScraper()
         mItemTag = ItemTag()
 
-        if (iID != -1){
-            //If it's not on the db found return
-            val  itemTag = db.findItemTagByID(iID)
-
-            //Found the item?
-            if (itemTag != null){
+        if (iID != -1) {
+            val itemTag = db.findItemTagByID(iID)
+            if (itemTag != null) {
                 mItemTag = itemTag
-            }else{
-                //They got us good they gave a fake ID wp me (go fix the code)
-                Log.wtf(
-                    "Fake ID",
-                    "This should not happened, intent.getIntExtra(\"itemID\", -1) returned an id that was not from db"
-                )
-                finish()
+            } else {
+                Log.wtf("Fake ID", "Invalid ID: $iID")
+                parentFragmentManager.popBackStack()
                 return
             }
-        }
-        else{
-            if (barcode.isNullOrBlank()){
-                Toast.makeText(this, "Error no barcode to work with", Toast.LENGTH_SHORT).show()
-                finish()
+        } else {
+            if (barcode.isNullOrBlank()) {
+                Toast.makeText(context, "Error no barcode to work with", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack()
                 return
             }
 
-            val itemTag = ItemTag()
-            itemTag.barcode = barcode
-            itemTag.barcodeFormat = codeFormat?: ""
-
-            mItemTag = itemTag
+            mItemTag.barcode = barcode
+            mItemTag.barcodeFormat = codeFormat ?: ""
         }
 
-        //Initialize private hooks
-        initVar()
-
-        //Set/Update view
         updateViews()
-
-        //Hide barcode & show image
         loadImageDisplay(mDisplayBarcode)
 
-        ///---On Click Events---///
-        //Retake/update image
-        ivImageDisplay.setOnClickListener{
+        setupListeners()
+    }
 
-            if (!cameraIsBusy){
+    private fun initVar(view: View) {
+        etLabel = view.findViewById(R.id.et_label)
+        etBrand = view.findViewById(R.id.et_brand)
+        tvBarcode = view.findViewById(R.id.tv_barcode)
+        etDefaultPrice = view.findViewById(R.id.et_default_price)
+        tvTagCreationDate = view.findViewById(R.id.tv_tag_date)
+        lvPriceTags = view.findViewById(R.id.tags_note_lv)
+        ivImageDisplay = view.findViewById(R.id.iv_image)
+        ivBarcodeDisplay = view.findViewById(R.id.iv_barcode)
+
+        btnSave = view.findViewById(R.id.btn_save)
+        btnClose = view.findViewById(R.id.btn_close)
+        btnWebSearch = view.findViewById(R.id.btn_web_scrap)
+    }
+
+    private fun setupListeners() {
+        ivImageDisplay.setOnClickListener {
+            if (!cameraIsBusy) {
                 picPreview.launch()
             }
         }
 
-        ivImageDisplay.setOnLongClickListener{ view->
+        ivImageDisplay.setOnLongClickListener { view ->
             val popupMenu = PopupMenu(
                 view.context,
                 view,
-                Gravity.END)
+                Gravity.END
+            )
 
-            //Show icon (no idea why it's not showing by default)
             try {
                 val method = popupMenu.menu.javaClass.getDeclaredMethod(
                     "setOptionalIconsVisible",
@@ -183,7 +173,7 @@ class EditTagActivity : AppCompatActivity() {
 
             popupMenu.inflate(R.menu.delete_popup_menu)
             popupMenu.setOnMenuItemClickListener { mi ->
-                when(mi.itemId){
+                when (mi.itemId) {
                     R.id.delete_item -> {
                         mItemTag.imageByteArray = ByteArray(0)
                         loadImageDisplay(false)
@@ -196,68 +186,53 @@ class EditTagActivity : AppCompatActivity() {
             true
         }
 
-
-        //Toggle Image and Barcode view
         tvBarcode.setOnClickListener { toggleItemDisplay() }
 
-        //Copy the barcode on long-click
-        tvBarcode.setOnLongClickListener{
+        tvBarcode.setOnLongClickListener {
             if (tvBarcode.text.isNotBlank()) {
                 val clipboard: ClipboardManager =
-                    getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                    requireActivity().getSystemService(ClipboardManager::class.java)
                 val clip = ClipData.newPlainText(mItemTag.barcode, mItemTag.barcode)
                 clipboard.setPrimaryClip(clip)
-                Toast.makeText(this, "Copied: ${mItemTag.barcode}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Copied: ${mItemTag.barcode}", Toast.LENGTH_SHORT).show()
             }
             true
         }
 
-        //Close
-        btnClose.setOnClickListener { finish() }
+        btnClose.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
-        //Scrap product value from the web
-        btnWebSearch.setOnClickListener{
-
-            if (isOnline(this)) {
-                Toast.makeText(this, "Experimental", Toast.LENGTH_SHORT).show()
+        btnWebSearch.setOnClickListener {
+            if (isOnline(requireContext())) {
+                Toast.makeText(context, "Experimental", Toast.LENGTH_SHORT).show()
                 setWebScraps()
-            }else{
-                Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
             }
         }
 
-        //Save/Update the current view in the DB
         btnSave.setOnClickListener {
-
-            //update_mTags
-            if (etLabel.text.isNotEmpty()){
+            if (etLabel.text.isNotEmpty()) {
                 mItemTag.label = etLabel.text.toString()
             }
-            if (etBrand.text.isNotEmpty()){
+            if (etBrand.text.isNotEmpty()) {
                 mItemTag.brand = etBrand.text.toString()
             }
-            if (etDefaultPrice.text.isNotEmpty()){
-                mItemTag.defaultPrice = etDefaultPrice.text.toString().toDoubleOrNull()?: 0.00
+            if (etDefaultPrice.text.isNotEmpty()) {
+                mItemTag.defaultPrice = etDefaultPrice.text.toString().toDoubleOrNull() ?: 0.00
             }
 
-            //If exists update else create
-            if (db.tagExists(mItemTag)){
+            if (db.tagExists(mItemTag)) {
                 db.updateTag(mItemTag)
-            }
-            else{
+            } else {
                 db.insertItemTag(mItemTag)
             }
-            Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show()
-            super.onResume()
-            finish()
+            Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+            parentFragmentManager.popBackStack()
         }
-
-        //TODO Tag Prices List view adapter
     }
 
-    /**
-     * Update all the binding for the visual elements
-     */
     private fun updateViews() {
 
         //barcode
@@ -284,12 +259,6 @@ class EditTagActivity : AppCompatActivity() {
         tvTagCreationDate.hint = mItemTag.createdOn
     }
 
-    /**
-     * load image for the image display
-     *
-     * loadBarcodeBitmap? load barcode image else load item image
-     * returns true successful
-     */
     private fun loadImageDisplay(loadBarcodeBitmap: Boolean): Boolean {
 
         //Show barcode image
@@ -309,14 +278,14 @@ class EditTagActivity : AppCompatActivity() {
                     BarcodeFormat.CODABAR -> Code128Writer()
                     BarcodeFormat.QR_CODE -> QRCodeWriter()
                     else -> {
-                        Toast.makeText(this, "Sorry, can't recreate the barcode", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Sorry, can't recreate the barcode", Toast.LENGTH_SHORT).show()
                         return false
                     }
                 }
 
                 //Nothing to gen
                 if (mItemTag.barcode.isEmpty()){
-                    Toast.makeText(this, "Cant generate barcode", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Cant generate barcode", Toast.LENGTH_SHORT).show()
                     return false
                 }
 
@@ -334,7 +303,7 @@ class EditTagActivity : AppCompatActivity() {
                     ivBarcodeDisplay.setImageBitmap(bmp)
 
                 }catch (err : WriterException){
-                    Toast.makeText(this@EditTagActivity, "${err.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "${err.message}", Toast.LENGTH_SHORT).show()
                     err.printStackTrace()
                     //we have nothing to show
                     return false
@@ -359,7 +328,6 @@ class EditTagActivity : AppCompatActivity() {
         ivImageDisplay.visibility = if (loadBarcodeBitmap) View.INVISIBLE else View.VISIBLE
         return true
     }
-
     private fun toggleItemDisplay() {
 
         //!mDisplayBarcode because we are trying to toggle
@@ -373,7 +341,7 @@ class EditTagActivity : AppCompatActivity() {
             mDisplayBarcode = !mDisplayBarcode
         }else{
             //Couldn't load
-            Toast.makeText(this, "Couldn't load the image", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Couldn't load the image", Toast.LENGTH_SHORT).show()
             return
         }
     }
@@ -396,7 +364,7 @@ class EditTagActivity : AppCompatActivity() {
 
             launch(Dispatchers.Main) {
                 //Update views
-                Toast.makeText(applicationContext, "Done", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Done", Toast.LENGTH_SHORT).show()
                 loadImageDisplay(false)
                 updateViews()
             }
