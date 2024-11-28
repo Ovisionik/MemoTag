@@ -14,14 +14,16 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.ListView
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.Writer
 import com.google.zxing.WriterException
@@ -38,6 +40,7 @@ import com.ovisionik.memotag.utils.BitmapUtils.compressTo1MIO
 import com.ovisionik.memotag.utils.BitmapUtils.removeXPercent
 import com.ovisionik.memotag.utils.BitmapUtils.toBitmap
 import com.ovisionik.memotag.utils.BitmapUtils.toByteArray
+import com.ovisionik.memotag.utils.NoteAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -45,6 +48,7 @@ import kotlinx.coroutines.launch
 class EditTagFragment : Fragment() {
 
     private var mDisplayBarcode: Boolean = false
+    private var cameraIsBusy = false
 
     //Utils
     private lateinit var db: DatabaseHelper
@@ -54,7 +58,6 @@ class EditTagFragment : Fragment() {
     // Views
     private lateinit var ivImageDisplay: ImageView
     private lateinit var ivBarcodeDisplay: ImageView
-    private lateinit var lvPriceTags: ListView
     private lateinit var etLabel: EditText
     private lateinit var etBrand: EditText
     private lateinit var etDefaultPrice: EditText
@@ -65,7 +68,10 @@ class EditTagFragment : Fragment() {
     private lateinit var btnClose: Button
     private lateinit var btnWebSearch: ImageButton
 
-    private var cameraIsBusy = false
+    //Note
+    private lateinit var noteRecyclerView: RecyclerView
+    private lateinit var noteAdapter: NoteAdapter
+
 
     private val picPreview = registerForActivityResult(
         ActivityResultContracts.TakePicturePreview()
@@ -82,11 +88,63 @@ class EditTagFragment : Fragment() {
         cameraIsBusy = false
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            mItemTag.id = it.getInt("itemID")
+            mItemTag.barcode = it.getString("itemCode").toString()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_edit_tag, container, false)
+
+        val view = inflater.inflate(R.layout.fragment_edit_tag, container, false)
+        view.isClickable = true
+
+        return view
+    }
+
+    companion object {
+
+        fun newInstance(itm : ItemTag) = EditTagFragment().apply {
+            mItemTag = itm
+        }
+        fun newInstance(itemId: Int, itemCode: String, codeFormat: String?) =
+            EditTagFragment().apply {
+
+                arguments = Bundle().apply {
+
+                    if(itemId != -1){
+
+                        //ID Exists (in the database)
+                        val dtb = DatabaseHelper.getInstance(requireContext())
+                        val  itemTag = dtb.findItemTagByID(itemId)
+
+                        //Found the item?
+                        if (itemTag != null){
+                            mItemTag = itemTag
+                        }else{
+                            //They got us good they gave a fake ID wp me (go fix the code)
+                            Log.wtf(
+                                "Fake ID",
+                                "This should not happened, intent.getIntExtra(\"itemID\", -1) returned an id that was not from db"
+                            )
+
+                            throw Exception ("Expected item doesn't exists")
+                        }
+                    }
+                    else{
+                        //New Item
+                        mItemTag = ItemTag()
+                        mItemTag.id = itemId
+                        mItemTag.barcode = itemCode
+                        mItemTag.barcodeFormat = codeFormat ?: ""
+                    }
+                }
+            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,35 +153,9 @@ class EditTagFragment : Fragment() {
         // Initialize views
         initVar(view)
 
-        // Fetch arguments passed to the fragment
-        val iID = arguments?.getInt("itemID", -1) ?: -1
-        val barcode = arguments?.getString("itemCode")
-        val codeFormat = arguments?.getString("codeFormatName")
-
         // Initialize database and scraper
         db = DatabaseHelper.getInstance(requireContext())
         scraper = ItemTagWebScraper()
-        mItemTag = ItemTag()
-
-        if (iID != -1) {
-            val itemTag = db.findItemTagByID(iID)
-            if (itemTag != null) {
-                mItemTag = itemTag
-            } else {
-                Log.wtf("Fake ID", "Invalid ID: $iID")
-                parentFragmentManager.popBackStack()
-                return
-            }
-        } else {
-            if (barcode.isNullOrBlank()) {
-                Toast.makeText(context, "Error no barcode to work with", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack()
-                return
-            }
-
-            mItemTag.barcode = barcode
-            mItemTag.barcodeFormat = codeFormat ?: ""
-        }
 
         updateViews()
         loadImageDisplay(mDisplayBarcode)
@@ -137,13 +169,26 @@ class EditTagFragment : Fragment() {
         tvBarcode = view.findViewById(R.id.tv_barcode)
         etDefaultPrice = view.findViewById(R.id.et_default_price)
         tvTagCreationDate = view.findViewById(R.id.tv_tag_date)
-        lvPriceTags = view.findViewById(R.id.tags_note_lv)
         ivImageDisplay = view.findViewById(R.id.iv_image)
         ivBarcodeDisplay = view.findViewById(R.id.iv_barcode)
 
         btnSave = view.findViewById(R.id.btn_save)
         btnClose = view.findViewById(R.id.btn_close)
         btnWebSearch = view.findViewById(R.id.btn_web_scrap)
+
+//
+//        //Note List related
+//        noteRecyclerView = view.findViewById(R.id.tags_note_rv)
+//        val noteList = listOf(
+//            NoteTag(1,"", "", BigDecimal(0)),
+//            NoteTag(2,"Note 2", "", BigDecimal(1.5)),
+//            NoteTag(3,"Note 3", "", BigDecimal(50))
+//        )
+//        val noteAdapter = NoteAdapter(noteList)
+//        noteRecyclerView.apply {
+//            layoutManager = LinearLayoutManager(context)
+//            adapter = noteAdapter
+//        }
     }
 
     private fun setupListeners() {
@@ -229,6 +274,9 @@ class EditTagFragment : Fragment() {
                 db.insertItemTag(mItemTag)
             }
             Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+            //Notify the list viewer?
+            setFragmentResult("saveTagKey", bundleOf("tagID" to mItemTag.id))
+
             parentFragmentManager.popBackStack()
         }
     }

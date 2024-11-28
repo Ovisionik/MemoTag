@@ -3,7 +3,7 @@ package com.ovisionik.memotag.data
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class PriceTag(
+data class NoteTag(
     var id: Int = -1,
     var note: String = "",
     var label: String = "",

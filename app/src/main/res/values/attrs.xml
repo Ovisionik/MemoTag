@@ -1,0 +1,3 @@
+<resources>
+    <attr name="fragmentBackground" format="reference" />
+</resources>

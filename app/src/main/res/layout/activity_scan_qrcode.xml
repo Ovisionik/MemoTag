@@ -49,7 +49,7 @@
                 android:id="@+id/tv_name_indic_scan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:paddingBottom="24dp"
                 android:text="@string/label_indicator"
                 android:textColor="@color/tertiary"
                 android:textSize="16sp"

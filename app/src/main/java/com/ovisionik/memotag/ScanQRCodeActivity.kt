@@ -38,6 +38,7 @@ class ScanQRCodeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         this.setVisible(false)
         setContentView(R.layout.activity_scan_qrcode)
 
@@ -79,14 +80,12 @@ class ScanQRCodeActivity : AppCompatActivity() {
     }
 
     private fun launchEditTagPage() {
-        Intent(this, EditTagActivity::class.java).also{
-            it.putExtra("itemID", mItemTag.id)
-            it.putExtra("codeFormatName", mFormatName)
-            it.putExtra("itemCode", mScannedCode)
-            startActivity(it)
-        }
-        super.onResume()
-        finish()
+        val intent = Intent()
+        intent.putExtra("action", "editTag_fragment")
+        intent.putExtra("code", mItemTag.barcode)
+
+        setResult(RESULT_OK, intent)
+        finish() // Close this activity
     }
 
     private fun resetViews() {

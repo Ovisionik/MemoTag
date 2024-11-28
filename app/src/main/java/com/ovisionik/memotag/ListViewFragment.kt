@@ -1,72 +1,65 @@
 package com.ovisionik.memotag
 
 import android.Manifest
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ListViewFragment : Fragment(R.layout.fragment_list_view) {
 
-    private lateinit var db: DatabaseHelper
-
-    private lateinit var listDisplay:List<ItemTag>
-
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var loadedList:List<ItemTag>
 
     private lateinit var adapter: RvAdapter
+
+    private lateinit var database: DatabaseHelper
 
     private var isLoading = false
     private var currentPage = 1
     private val pageSize = 20  // Load 20 items at a time
 
-    private lateinit var toolbar: Toolbar
-    private lateinit var ivSearchBtn: ImageView
-    private lateinit var etFilterList: EditText
-
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        arguments?.let {
-//
-//        }
-//    }
-
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //init database
-        db              =   DatabaseHelper.getInstance(requireContext())
-        listDisplay     =   db.getAllTags().reversed().toCollection(ArrayList())
-        adapter         =   RvAdapter(listDisplay)
+//        val toolbar         =   view.findViewById<Toolbar>(R.id.toolbar)
+//        val recyclerView    =   view.findViewById<RecyclerView>(R.id.tagItem_rv)
 
-        recyclerView    =   view.findViewById<RecyclerView>(R.id.tagItem_rv)
-
-        val toolbar         =   view.findViewById<Toolbar>(R.id.toolbar)
+        val swipeRL         =   view.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
         val etFilterList    =   view.findViewById<EditText>(R.id.et_filter_rv)
         val btnItemFilter   =   view.findViewById<ImageView>(R.id.iv_search)
         val btnScanQR       =   view.findViewById<FloatingActionButton>(R.id.fab_scan_barcode)
-
-        //Setup adapter for ListView
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = adapter
-        loadDataFromDatabase()
 
         btnScanQR.setOnClickListener(){
             //Check perms and launchQRScannerActivity
@@ -83,6 +76,24 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
             false
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Run a background task on IO dispatcher
+
+            val result = withContext(Dispatchers.IO) {
+                //performHeavyTask()
+
+                adapter = RvAdapter(loadedList) { clickedItem ->
+                    // Replace the current fragment with EditTagFragment
+                    gotoEditTag(clickedItem)
+                }
+
+                //Setup adapter for ListView
+                val recyclerView    =   view.findViewById<RecyclerView>(R.id.tagItem_rv)
+                recyclerView.layoutManager = LinearLayoutManager(requireContext())
+                recyclerView.adapter = adapter
+            }
+        }
+
         //Search button
         btnItemFilter.setOnClickListener(){
             //Has some text to search?
@@ -91,46 +102,48 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
             }
             adapter.filter.filter(etFilterList.text)
         }
-    }
 
-    private fun filterItemShown(text: String) {
+        requireActivity().supportFragmentManager.setFragmentResultListener("saveTagKey", this) { key, bundle ->
+            val tagID = bundle.getInt("tagID") // Retrieve the data using the same key
+            Log.d("ResultListener", "Received key: $key") // Handle the received data
+            Log.d("ResultListener", "Received tag: $tagID") // Handle the received data
+            //Update adapter? so it has the new modified list
 
-    }
+            val modTag = database.findItemTagByID(tagID)
 
-    //TODO: Remove on resume here and load data and make it reload this fragment from the mainActivity
-    override fun onResume() {
-        super.onResume()
-
-        //Update adapter
-        val dbTags = db.getAllTags().reversed()
-
-        //update the adapter only if the number of items are different
-        if (adapter.filteredTags.hashCode() != dbTags.hashCode()) {
-
-            //Check size if it's the same only item needs to update
-            if (adapter.filteredTags.size == dbTags.size) {
-
-                val filTags = adapter.filteredTags
-                for (i in dbTags.indices) {
-                    if (dbTags[i].id == filTags[i].id && dbTags[i].hashCode() != filTags[i].hashCode()) {
-                        //item changed
-                        adapter.filteredTags[i] = dbTags[i]
-                        recyclerView.adapter?.notifyItemChanged(i)
-                    }
-                }
-            } else {
-                //We could check and update each individual item
-
-                //... or update everything in the list
+            if(tagID < 0){
+                //-1 = new item
                 loadDataFromDatabase()
             }
+            else
+            {
+                adapter.itemChanged(modTag as ItemTag)
+            }
+        }
+
+        swipeRL.setOnRefreshListener{
+            loadDataFromDatabase()
+
+            // Stop the refresh animation once done
+            swipeRL.isRefreshing = false
+        }
+    }
+
+    companion object {
+        fun newInstance(initialList :List<ItemTag>, databaseHelper: DatabaseHelper) = ListViewFragment().apply{
+            loadedList = initialList
+            database = databaseHelper
         }
     }
 
     private fun loadDataFromDatabase() {
-        val databaseHelper = DatabaseHelper.getInstance(requireContext())
-        val itemTags = databaseHelper.getAllTags().reversed().toCollection(ArrayList()) // Fetch data
-        adapter.setData(itemTags) // Update adapter data
+
+        //For whatever reason if the func was called before init -> don't do anything
+        if(!::adapter.isInitialized)
+            return
+
+        loadedList = database.getAllTags().reversed().toCollection(ArrayList()) // Fetch data
+        adapter.setData(loadedList) // Update adapter data
     }
 
     private fun requestPermissions() {
@@ -182,8 +195,43 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
         }
     }
 
+    private val scanQRCodeLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val action = result.data?.getStringExtra("action")
+            val barcode = result.data?.getStringExtra("code").toString()
+
+            val db  = DatabaseHelper.getInstance(requireContext())
+            val itm = db.findTagByBarcode(barcode)
+
+            if (action == "editTag_fragment" && itm !=null) {
+                gotoEditTag(itm)
+            }else{
+                val newTag = ItemTag()
+                newTag.barcode = barcode
+                gotoEditTag(newTag)
+            }
+        }
+    }
+
+    private fun gotoEditTag(tag: ItemTag){
+
+        val fragment = EditTagFragment.newInstance(tag)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.fade_and_slide_in,  // Animation for fragment entering
+                R.anim.fade_and_slide_out, // Animation for fragment exiting
+                R.anim.fade_and_slide_in,  // Animation for fragment entering (when popping back)
+                R.anim.fade_and_slide_out   // Animation for fragment exiting (when popping back)
+            )
+            .add(R.id.content_frame, fragment)
+            .addToBackStack(null) // Add transaction to the back stack
+            .commit()
+    }
+
     private fun launchQRScannerActivity() {
         val intent = Intent(requireContext(), ScanQRCodeActivity::class.java)
-        startActivity(intent)
+        scanQRCodeLauncher.launch(intent)
     }
 }

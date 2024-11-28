@@ -1,128 +1,142 @@
 package com.ovisionik.memotag
 
 import android.os.Bundle
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedListener {
 
     //FILTERED ITEMS
-
     private lateinit var db: DatabaseHelper
 
-    private lateinit var recyclerViewTags: RecyclerView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var touchBlocker: View
 
-    private lateinit var tagAdapter: RvAdapter
-
-    private lateinit var toolbar: Toolbar
-    private lateinit var ivSearchBtn: ImageView
-    private lateinit var etFilterList: EditText
-
-    //private var firstLoad: Boolean = true
+    private var firstLoad: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Initialize components
+        drawerLayout = findViewById(R.id.drawer_layout)
+        touchBlocker = findViewById(R.id.touch_blocker)
 
-//        val elapsed = measureTimeMillis {
-//            Thread.sleep(100)
-//        }
-//
-//        showFragment(ListViewFragment())
-//
-//        Toast.makeText(this, "Created first frag $elapsed", Toast.LENGTH_SHORT).show()
-//
-        //Preload DB
-        db = DatabaseHelper.getInstance(this)
-        Toast.makeText(this, "DB ready", Toast.LENGTH_SHORT).show()
-
-        showFragment(ListViewFragment())
-
-        //Animate loading
-
-//
-//        registerForContextMenu(recyclerViewTags)
-//
-//        etFilterList.setOnEditorActionListener { v, actionId, event ->
-//
-//            if (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER || actionId == EditorInfo.IME_ACTION_DONE) {
-//                //do what you want on the press of 'done'
-//                v.clearFocus()
-//                ivSearchBtn.performClick()
-//            }
-//            false
-//        }
-//
-//        ivSearchBtn.setOnClickListener {
-//
-//            //Search only if...
-//            if (etFilterList.text.isNotBlank() && etFilterList.text.length > 1) {
-//                tagAdapter.filter.filter(etFilterList.text)
-//
-//            } else{
-//                Toast.makeText(this, "search too short: try at least 2 character", Toast.LENGTH_SHORT).show()
-//                //update adapter (reset filter/item view)
-//                updateRvAdapter()
-//                //regain focus
-//                etFilterList.text.clear()
-//                etFilterList.requestFocus()
-//            }
-//        }
-//
-//        //Scan button
-//        val fabCameraScan = findViewById<FloatingActionButton>(R.id.fab_scan_barcode)
-//
-//        fabCameraScan.setOnClickListener {
-//            Intent(this, ScanQRCodeActivity::class.java).also {
-//                startActivity(it)
-//            }
-//        }
-    }
-
-    private fun showFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_act_fragment_container, fragment) // Replaces the entire screen content
-            .addToBackStack(null) // Allows the user to go back to MainActivity
+            .replace(R.id.content_frame, LoadingScreenFragment.newInstance("Loading item list…")) // Replaces the entire screen content
+            .addToBackStack(null)
             .commit()
-    }
 
-    private fun openListDisplayFragment() {
-        val fragment = ListViewFragment()
-
-        // Begin the fragment transaction
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_act_fragment_container, fragment) // Replaces the entire screen content
-            .addToBackStack(null) // Allows the user to go back to MainActivity
+            .replace(R.id.side_menu_container, SideMenuFragment()) // Replaces the entire screen content
+            .addToBackStack(null)
             .commit()
+
+        onMainContentChangeRequest(ListViewFragment())
+
+        manageSideMenu()
     }
-    override fun onResume() {
-        super.onResume()
 
-        showFragment(ListViewFragment())
+    /**
+     * Sets up the side menu and handles freezing the content_frame while the menu is open.
+     */
+    private fun manageSideMenu() {
 
-        //openListDisplayFragment()
-//        //Update/re-filter
-//        updateRvAdapter()
-//
-//        lazyLoadItemTags();
-//
-//        if (etFilterList.text.isNotBlank()){
-//            ivSearchBtn.performClick()
+        // Set up DrawerLayout listener
+        drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                touchBlocker.visibility = View.VISIBLE // Show the blocker when sliding starts
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+                // Make the touch blocker visible to disable interactions
+                touchBlocker.visibility = View.VISIBLE
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                // Hide the touch blocker when the drawer is closed
+                touchBlocker.visibility = View.GONE
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {}
+        })
+
+        // Prevent touch events from passing through the touch blocker
+        touchBlocker.setOnTouchListener { _, _ -> true }
+    }
+
+    override fun onMainContentChangeRequest(fragment: Fragment) {
+
+        drawerLayout.closeDrawer(GravityCompat.START)
+
+        if(!isFragmentAlreadyDisplayed(R.id.content_frame, fragment)){
+
+            if(fragment is ListViewFragment){
+                // Load database asynchronously
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        // Load the database in a background thread
+                        db = DatabaseHelper.getInstance(this@MainActivity)
+                        val list = db.getAllTags().reversed().toCollection(ArrayList())
+                        val frag = ListViewFragment.newInstance(list, db)
+                        supportFragmentManager.beginTransaction()
+                            .setCustomAnimations(
+                                R.anim.fade_and_slide_in,  // Animation for fragment entering
+                                R.anim.fade_and_slide_out, // Animation for fragment exiting
+                                R.anim.fade_and_slide_in,  // Animation for fragment entering (when popping back)
+                                R.anim.fade_and_slide_out   // Animation for fragment exiting (when popping back)
+                            )
+                            .replace(R.id.content_frame, frag)
+                            .addToBackStack(null) // Add to back stack for navigation
+                            .commit()
+                    }
+                }
+                return
+            }
+
+            // Replace the content in content_frame with the selected fragment
+            supportFragmentManager.beginTransaction()
+                .setCustomAnimations(
+                    R.anim.fade_and_slide_in,  // Animation for fragment entering
+                    R.anim.fade_and_slide_out, // Animation for fragment exiting
+                    R.anim.fade_and_slide_in,  // Animation for fragment entering (when popping back)
+                    R.anim.fade_and_slide_out   // Animation for fragment exiting (when popping back)
+                )
+                .add(R.id.content_frame, fragment)
+                .addToBackStack(null) // Add to back stack for navigation
+                .commit()
+        }
+    }
+    private fun isFragmentAlreadyDisplayed(containerId: Int, newFragment: Fragment): Boolean {
+        val fragmentManager = supportFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(containerId)
+
+        // Check if the container already has the desired fragment
+        return currentFragment != null && currentFragment::class == newFragment::class
+    }
+
+//    override fun onResume() {
+//        super.onResume()
+//        Log.d("onResume", "OnResume In progress")
+//        try {
+//            if(tagAdapter.filteredTags.hashCode() != db.hashCode())
+//                Log.d("onResume", "Adapter Filter Check = Different")
+//            else
+//                Log.d("onResume", "Adapter Filter Check = Same")
 //        }
-//
-//        Toast.makeText(this, "asd", Toast.LENGTH_LONG).show();
-    }
+//        catch (e: Exception){
+//            Log.e("onResume", "Error : ${e.message}")
+//        }
+//    }
 
     //TODO:
     private fun lazyLoadItemTags(){
@@ -131,46 +145,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //TODO: Remove/Adapt to load gradually
-    private fun updateRvAdapter() {
-
-        //Update adapter
-        val dbTags = db.getAllTags().reversed()
-
-        //update the adapter only if the number of items are different
-        if (tagAdapter.filteredTags.hashCode() != dbTags.hashCode()) {
-
-            //Check size if it's the same only item needs to update
-            if (tagAdapter.filteredTags.size == dbTags.size) {
-
-                val filTags = tagAdapter.filteredTags
-                for (i in dbTags.indices) {
-                    if (dbTags[i].id == filTags[i].id && dbTags[i].hashCode() != filTags[i].hashCode()) {
-                        //item changed
-                        tagAdapter.filteredTags[i] = dbTags[i]
-                        recyclerViewTags.adapter?.notifyItemChanged(i)
-                    }
-                }
-            } else {
-                //We could check and update each individual item
-
-                //... or update everything in the list
-                tagAdapter = RvAdapter(ArrayList(dbTags))
-                recyclerViewTags.adapter = tagAdapter
-            }
-        }
-    }
+//    //TODO: Remove/Adapt to load gradually
+//    private fun updateRvAdapter() {
+//
+//        if(firstLoad)
+//            return
+//
+//        //Update adapter
+//        val dbTags = DatabaseHelper.getInstance(this).getAllTags().reversed()
+//
+//        //update the adapter only if the number of items are different
+//        if (tagAdapter.filteredTags.hashCode() != dbTags.hashCode()) {
+//
+//            //Check size if it's the same only item needs to update
+//            if (tagAdapter.filteredTags.size == dbTags.size) {
+//
+//                val filTags = tagAdapter.filteredTags
+//                for (i in dbTags.indices) {
+//                    if (dbTags[i].id == filTags[i].id && dbTags[i].hashCode() != filTags[i].hashCode()) {
+//                        //item changed
+//                        tagAdapter.filteredTags[i] = dbTags[i]
+//                        recyclerViewTags.adapter?.notifyItemChanged(i)
+//                    }
+//                }
+//            } else {
+//                //We could check and update each individual item
+//
+//                //... or update everything in the list
+//                onMainContentChangeRequest(ListViewFragment())
+//            }
+//        }
+//    }
 
     private fun getDummyItems():ArrayList<ItemTag>{
         val tagList = ArrayList<ItemTag>()
         for(i in 0..3){
             var itm = ItemTag()
-            itm.id = i;
-            itm.label = i.toString();
-            itm.barcode = i.toString();
-            tagList.add(itm);
+            itm.id = i
+            itm.label = i.toString()
+            itm.barcode = i.toString()
+            tagList.add(itm)
         }
-        return  tagList;
+        return  tagList
     }
 }
 

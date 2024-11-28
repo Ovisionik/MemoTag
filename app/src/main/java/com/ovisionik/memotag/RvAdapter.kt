@@ -1,7 +1,6 @@
 package com.ovisionik.memotag
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -18,9 +17,13 @@ import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import java.lang.Double.parseDouble
 
-class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapter.ViewHolder>(), Filterable {
+class RvAdapter(
+    private var items: List<ItemTag>,
+    private val clickListener: (ItemTag) -> Unit // Pass a click listener as a lambda
+) : RecyclerView.Adapter<RvAdapter.ViewHolder>(), Filterable {
 
     var filteredTags: ArrayList<ItemTag> = ArrayList()
+
     init {
         filteredTags = items as ArrayList<ItemTag>
     }
@@ -86,15 +89,10 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
         }
 
         //On item click logic
-        holder.itemView.setOnClickListener{ view ->
-            val context = view.context
-            Intent(context, EditTagActivity::class.java).also {
-                it.putExtra("itemID", mItemTag.id)
-                context.startActivity(it)
-                notifyItemChanged(position)
-                return@setOnClickListener
-            }
+        holder.itemView.setOnClickListener {
+            clickListener(mItemTag) // Delegate click event to the listener
         }
+
         holder.bindToView(mItemTag)
     }
 
@@ -181,5 +179,14 @@ class RvAdapter(private var items: List<ItemTag>) : RecyclerView.Adapter<RvAdapt
         }
 
         return searchNumber.equals(price)
+    }
+
+    fun getList(): List<ItemTag> {
+        return filteredTags
+    }
+
+    fun itemChanged(item: ItemTag){
+        val mIndex = filteredTags.indexOfFirst { i -> i.id == item.id }
+        notifyItemChanged(mIndex)
     }
 }

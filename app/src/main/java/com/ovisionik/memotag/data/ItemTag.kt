@@ -1,4 +1,5 @@
 package com.ovisionik.memotag.data
+import java.io.Serializable
 import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -38,9 +39,9 @@ data class ItemTag (
 
     var note: String = "",
 
-    var priceTags: MutableList<PriceTag>? = null,
+    var noteTags: MutableList<NoteTag>? = null,
 
-){
+    ):Serializable{
     fun moneyString(price:Number = defaultPrice):String{
         return getLocalPriceFormatted(price)
     }

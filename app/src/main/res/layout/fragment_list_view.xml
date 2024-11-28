@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?fragmentBackground"
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -18,7 +19,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <RelativeLayout
-
             android:layout_width="match_parent"
             android:layout_height="42dp"
             android:layout_marginStart="0dp"
@@ -64,26 +64,26 @@
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
-    <RelativeLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        android:layout_alignParentBottom="true"
-        >
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tagItem_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="0dp"
-
             android:layout_marginBottom="65dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:entries="@array/dummyListItems"
             tools:itemCount="6"
-            tools:listitem="@layout/tag_list_view_item_model"/>
+            tools:listitem="@layout/tag_list_view_item_model" />
 
-    </RelativeLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_scan_barcode"
@@ -91,7 +91,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-
+        app:borderWidth="1dp"
         android:clickable="true"
         android:contentDescription="@string/app_name"
         android:scaleType="fitXY"
@@ -99,6 +99,4 @@
         android:tooltipText="Scan a BarCode"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

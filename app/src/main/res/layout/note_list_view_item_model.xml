@@ -13,10 +13,26 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:id="@+id/add_note_field_cover">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="TIS IS A TEST Click To Toggle Visibility"
+            android:gravity="center"
+
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/add_note_content">
 
         <EditText
-            android:id="@+id/cv_tag_image_value"
+            android:id="@+id/et_add_note"
             android:layout_width="280dp"
             android:layout_height="96dp"
             android:layout_alignParentStart="true"
@@ -33,6 +49,7 @@
             />
 
         <EditText
+            android:id="@+id/et_add_price_note"
             android:layout_width="110dp"
             android:layout_height="85dp"
             android:layout_alignParentEnd="true"
@@ -52,8 +69,6 @@
             android:selectAllOnFocus="true"
             android:textAlignment="textEnd"
             android:textStyle="bold" />
-
     </RelativeLayout>
-
 
 </com.google.android.material.card.MaterialCardView>

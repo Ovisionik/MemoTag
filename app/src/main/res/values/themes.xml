@@ -1,12 +1,15 @@
 <resources
     xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Base application theme. -->
-    <style name="Base.Theme.MemoTag" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.MemoTag" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
 
-
+        <item name="fontFamily" type="font">@font/sansita_regular</item>
         <item name="android:textColor">@color/primaryDarker</item>
+
+        <!-- Define light theme background -->
+        <item name="fragmentBackground">@android:color/white</item>
     </style>
 
 </resources>

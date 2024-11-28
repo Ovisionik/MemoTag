@@ -26,7 +26,7 @@ class DatabaseHelper private constructor(mContext: Context) : SQLiteOpenHelper(
         fun getInstance(context: Context): DatabaseHelper {
             // Return the existing instance if it’s already initialized
             return INSTANCE ?: synchronized(this) {
-                // Create a new instance if it hasn’t been initialized yet
+                // Create a new instance if it has not been initialized yet
                 val instance = DatabaseHelper(context.applicationContext)
                 INSTANCE = instance
                 instance
@@ -45,6 +45,7 @@ class DatabaseHelper private constructor(mContext: Context) : SQLiteOpenHelper(
         private const val ITEM_TAG_CATEGORY = "CATEGORY"
         private const val ITEM_TAG_PRICE = "PRICE"
         private const val ITEM_TAG_CREATED_ON = "CREATION_DATE"
+
         private const val PRICE_TAG_TABLE_NAME = "tagPrices"
         private const val PRICE_TAG_ID = "ID"
         private const val PRICE_TAG_ITEM_TAG_ID = "ITEM_TAG_ID"
@@ -53,8 +54,6 @@ class DatabaseHelper private constructor(mContext: Context) : SQLiteOpenHelper(
         private const val PRICE_TAG_NOTE = "NOTE"
         private const val PRICE_TAG_CREATED_ON = "CREATION_DATE"
     }
-
-    // onCreate and other methods remain the same
 
     override fun onCreate(db: SQLiteDatabase?) {
         val createTableTags = "CREATE TABLE IF NOT EXISTS $ITEM_TAG_TABLE_NAME (" +
@@ -331,4 +330,5 @@ class DatabaseHelper private constructor(mContext: Context) : SQLiteOpenHelper(
 
         return item != null
     }
+
 }
