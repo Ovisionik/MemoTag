@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Example Preferences -->
+    <ListPreference
+        android:key="theme_preference"
+        android:title="Theme"
+        android:summary="Select the app theme"
+        android:entries="@array/theme_options"
+        android:entryValues="@array/theme_values"
+        android:defaultValue="light" />
+
+    <SwitchPreferenceCompat
+        android:key="use_online_google_sheet"
+        android:title="Auto update when app start"
+        android:summary="Fetch data from online and save it to local database"
+        android:defaultValue="false"/>
+
+</PreferenceScreen>

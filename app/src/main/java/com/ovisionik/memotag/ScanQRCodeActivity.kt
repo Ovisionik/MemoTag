@@ -1,8 +1,6 @@
 package com.ovisionik.memotag
 
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -11,13 +9,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import com.ovisionik.memotag.utils.BitmapUtils.toBitmap
+import com.ovisionik.memotag.utils.PermissionManagerUtils
 
 class ScanQRCodeActivity : AppCompatActivity() {
 
@@ -56,7 +54,7 @@ class ScanQRCodeActivity : AppCompatActivity() {
         fabOK = findViewById(R.id.fab_check)
 
         //Open Camera
-        checkCameraPermission(this)
+        showCamera()
 
         //Go Back
         fabCancel.setOnClickListener{
@@ -69,7 +67,8 @@ class ScanQRCodeActivity : AppCompatActivity() {
         fabRetake.setOnClickListener {
             //Cleanup view
             resetViews()
-            checkCameraPermission(this)
+
+            showCamera()
             this.setVisible(true)
         }
 
@@ -138,6 +137,11 @@ class ScanQRCodeActivity : AppCompatActivity() {
     }
 
     private fun showCamera(){
+
+        val camPerm = PermissionManagerUtils.askForCameraPermission(this)
+        if (!camPerm)
+            return
+
         val option = ScanOptions()
         option.setPrompt("Scan a Code")
         option.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
@@ -153,20 +157,6 @@ class ScanQRCodeActivity : AppCompatActivity() {
     ){
             isGranted ->
         if (isGranted)
-        {
-            showCamera()
-        }
-    }
-
-    private fun checkCameraPermission(context: Context) {
-        if (shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)){
-            Toast.makeText(this, "Camera required", Toast.LENGTH_SHORT).show()
-        }
-        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-            shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)
-            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-        }
-        else
         {
             showCamera()
         }

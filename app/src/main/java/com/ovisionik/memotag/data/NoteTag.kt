@@ -9,4 +9,8 @@ data class NoteTag(
     var label: String = "",
     var price: BigDecimal = BigDecimal("0.0"),
     var createdOn: LocalDate = LocalDate.now(),
-)
+) {
+    object CREATOR {
+
+    }
+}

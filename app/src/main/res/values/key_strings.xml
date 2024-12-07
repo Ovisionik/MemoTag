@@ -1,0 +1,6 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyDashes">
+
+    <!--    throwaway keys (might be replaced later)     -->
+    <string name="google_sheets_url">https://docs.google.com/spreadsheets/d/1QevB9OyzijlC2vtzbmlL_F0poJWirBNgWHDH5Klaglo/export?format=csv&amp;gid=0</string>
+
+</resources>

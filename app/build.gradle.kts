@@ -50,13 +50,21 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.3")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     testImplementation("junit:junit:4.13.2")
     implementation("org.jsoup:jsoup:1.17.2")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.zxing:core:3.5.3")
 
-    //org.apache.poi.xssf.usermodel.XSSFWorkbook (used to export/read Excel files)
-//    implementation ("org.apache.poi:poi:5.2.3")
-//    implementation ("org.apache.poi:poi-ooxml:5.2.3")
+    // Core POI library
+    implementation ("org.apache.poi:poi:5.2.3")
+    // Support for .xlsx files (used to export/read Excel files)
+    implementation ("org.apache.poi:poi-ooxml:5.2.3")
+
+    implementation ("androidx.core:core-ktx:1.12.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation ("com.opencsv:opencsv:5.8")
+
+    implementation ("com.squareup.picasso:picasso:2.8")
 
 }

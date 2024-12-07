@@ -15,14 +15,11 @@
     <style name="Theme.MemoTag" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
-
         <item name="editTextStyle">@style/MemoTagEditTextStyle</item>
         <item name="android:textViewStyle">@style/MemoTagTextViewStyle</item>
         <item name="fontFamily" type="font">@font/sansita_regular</item>
-
-        <item name="fragmentBackground">@drawable/bg_sample_fragmented_dark</item>
+        <item name="mt_fragment_background">@drawable/bg_sample_fragmented_dark</item>
     </style>
-
 
 </resources>
 

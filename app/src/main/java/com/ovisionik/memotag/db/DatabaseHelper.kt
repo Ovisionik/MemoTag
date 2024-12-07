@@ -2,6 +2,7 @@ package com.ovisionik.memotag.db
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
@@ -329,6 +330,38 @@ class DatabaseHelper private constructor(mContext: Context) : SQLiteOpenHelper(
         val item = findTagByBarcode(barcode)
 
         return item != null
+    }
+
+    fun getTagsPaginated(limit: Int, offset: Int): List<ItemTag> {
+        val db = readableDatabase
+        val itemList = mutableListOf<ItemTag>()
+        val query = "SELECT * FROM $ITEM_TAG_TABLE_NAME ORDER BY id DESC LIMIT $limit OFFSET $offset"
+        val cursor = db.rawQuery(query, null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val item = cursorToItemTag(cursor)
+                itemList.add(item)
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return itemList
+    }
+
+    private fun cursorToItemTag(cursor: Cursor): ItemTag {
+        return ItemTag(
+            id = cursor.getInt(cursor.getColumnIndexOrThrow(ITEM_TAG_ID)),
+            label = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_LABEL)),
+            brand = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_BRAND)),
+            barcode = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_BARCODE)),
+            barcodeFormat = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_BARCODE_FORMAT)),
+            defaultPrice = cursor.getDouble(cursor.getColumnIndexOrThrow(ITEM_TAG_PRICE)),
+            createdOn = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_CREATED_ON)),
+            category = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_CATEGORY)),
+            imageByteArray = cursor.getBlob(cursor.getColumnIndexOrThrow(ITEM_TAG_IMAGE_BYTES)),
+            imageURL = cursor.getString(cursor.getColumnIndexOrThrow(ITEM_TAG_IMAGE_URL)),
+            note = "" // Add default or custom handling for note if it's not stored in the database.
+        )
     }
 
 }

@@ -1,3 +1,3 @@
 <resources>
-    <attr name="fragmentBackground" format="reference" />
+    <attr name="mt_fragment_background" format="reference" />
 </resources>

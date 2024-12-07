@@ -9,6 +9,7 @@
     android:layout_marginBottom="0dp"
     android:layout_marginHorizontal="4dp"
     android:outlineSpotShadowColor="@color/colorAccent"
+
     app:cardCornerRadius="8dp"
     app:cardElevation="16dp">
 

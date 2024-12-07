@@ -9,7 +9,7 @@
         <item name="android:textColor">@color/primaryDarker</item>
 
         <!-- Define light theme background -->
-        <item name="fragmentBackground">@android:color/white</item>
+        <item name="mt_fragment_background">@android:color/white</item>
     </style>
 
 </resources>

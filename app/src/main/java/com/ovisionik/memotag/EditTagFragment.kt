@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -35,12 +36,14 @@ import com.google.zxing.qrcode.QRCodeWriter
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import com.ovisionik.memotag.scraper.ItemTagWebScraper
-import com.ovisionik.memotag.utils.AppNetwork.isOnline
+import com.ovisionik.memotag.utils.AppNetwork
 import com.ovisionik.memotag.utils.BitmapUtils.compressTo1MIO
 import com.ovisionik.memotag.utils.BitmapUtils.removeXPercent
 import com.ovisionik.memotag.utils.BitmapUtils.toBitmap
 import com.ovisionik.memotag.utils.BitmapUtils.toByteArray
 import com.ovisionik.memotag.utils.NoteAdapter
+import com.ovisionik.memotag.utils.PermissionManagerUtils
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -60,9 +63,13 @@ class EditTagFragment : Fragment() {
     private lateinit var ivBarcodeDisplay: ImageView
     private lateinit var etLabel: EditText
     private lateinit var etBrand: EditText
+    private lateinit var etBarcode: EditText
+
     private lateinit var etDefaultPrice: EditText
     private lateinit var tvTagCreationDate: TextView
     private lateinit var tvBarcode: TextView
+
+    private lateinit var btnToggleExtra: Button
 
     private lateinit var btnSave: Button
     private lateinit var btnClose: Button
@@ -112,39 +119,6 @@ class EditTagFragment : Fragment() {
         fun newInstance(itm : ItemTag) = EditTagFragment().apply {
             mItemTag = itm
         }
-        fun newInstance(itemId: Int, itemCode: String, codeFormat: String?) =
-            EditTagFragment().apply {
-
-                arguments = Bundle().apply {
-
-                    if(itemId != -1){
-
-                        //ID Exists (in the database)
-                        val dtb = DatabaseHelper.getInstance(requireContext())
-                        val  itemTag = dtb.findItemTagByID(itemId)
-
-                        //Found the item?
-                        if (itemTag != null){
-                            mItemTag = itemTag
-                        }else{
-                            //They got us good they gave a fake ID wp me (go fix the code)
-                            Log.wtf(
-                                "Fake ID",
-                                "This should not happened, intent.getIntExtra(\"itemID\", -1) returned an id that was not from db"
-                            )
-
-                            throw Exception ("Expected item doesn't exists")
-                        }
-                    }
-                    else{
-                        //New Item
-                        mItemTag = ItemTag()
-                        mItemTag.id = itemId
-                        mItemTag.barcode = itemCode
-                        mItemTag.barcodeFormat = codeFormat ?: ""
-                    }
-                }
-            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -166,6 +140,7 @@ class EditTagFragment : Fragment() {
     private fun initVar(view: View) {
         etLabel = view.findViewById(R.id.et_label)
         etBrand = view.findViewById(R.id.et_brand)
+        etBarcode = view.findViewById(R.id.et_new_barcode)
         tvBarcode = view.findViewById(R.id.tv_barcode)
         etDefaultPrice = view.findViewById(R.id.et_default_price)
         tvTagCreationDate = view.findViewById(R.id.tv_tag_date)
@@ -176,19 +151,7 @@ class EditTagFragment : Fragment() {
         btnClose = view.findViewById(R.id.btn_close)
         btnWebSearch = view.findViewById(R.id.btn_web_scrap)
 
-//
-//        //Note List related
-//        noteRecyclerView = view.findViewById(R.id.tags_note_rv)
-//        val noteList = listOf(
-//            NoteTag(1,"", "", BigDecimal(0)),
-//            NoteTag(2,"Note 2", "", BigDecimal(1.5)),
-//            NoteTag(3,"Note 3", "", BigDecimal(50))
-//        )
-//        val noteAdapter = NoteAdapter(noteList)
-//        noteRecyclerView.apply {
-//            layoutManager = LinearLayoutManager(context)
-//            adapter = noteAdapter
-//        }
+        btnToggleExtra = view.findViewById(R.id.btn_extra_info)
     }
 
     private fun setupListeners() {
@@ -244,20 +207,41 @@ class EditTagFragment : Fragment() {
             true
         }
 
+        val extraLayout = view?.findViewById<LinearLayout>(R.id.ll_extra_info_layout)
+        btnToggleExtra.setOnClickListener {
+            if (extraLayout?.visibility == View.VISIBLE){
+                extraLayout.visibility = View.GONE
+            }else{
+                extraLayout?.visibility = View.VISIBLE
+            }
+        }
+
         btnClose.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
         btnWebSearch.setOnClickListener {
-            if (isOnline(requireContext())) {
+
+            if (!PermissionManagerUtils.askForInternetPermission(requireActivity()))
+                return@setOnClickListener
+
+            if (AppNetwork.isInternetAvailable(requireContext())) {
                 Toast.makeText(context, "Experimental", Toast.LENGTH_SHORT).show()
                 setWebScraps()
             } else {
-                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "No internet connection :(", Toast.LENGTH_SHORT).show()
             }
         }
 
         btnSave.setOnClickListener {
+
+            if (etBarcode.text.isNotEmpty()) {
+                mItemTag.barcode = etBarcode.text.toString()
+            }else{
+                Toast.makeText(context, getString(R.string.barcode_prompt_msg), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             if (etLabel.text.isNotEmpty()) {
                 mItemTag.label = etLabel.text.toString()
             }
@@ -274,9 +258,9 @@ class EditTagFragment : Fragment() {
                 db.insertItemTag(mItemTag)
             }
             Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
-            //Notify the list viewer?
-            setFragmentResult("saveTagKey", bundleOf("tagID" to mItemTag.id))
 
+            //Notify the list viewer the item with this id changed
+            setFragmentResult("saveTagKey", bundleOf("tagID" to mItemTag.id))
             parentFragmentManager.popBackStack()
         }
     }
@@ -284,7 +268,21 @@ class EditTagFragment : Fragment() {
     private fun updateViews() {
 
         //barcode
-        tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode)"◈" else "❖")
+        if (mItemTag.barcode.isNotBlank())
+        {
+            tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode)"◈" else "❖")
+
+            //Show the barcode field?
+            view?.findViewById<TextView>(R.id.tv_new_barcode_indic)?.visibility = View.GONE
+            view?.findViewById<EditText>(R.id.et_new_barcode)?.visibility = View.GONE
+            etBarcode.setText(mItemTag.barcode)
+            etBarcode.isEnabled = false
+        }else{
+            //For new item let the user set the barcode/id
+            tvBarcode.isEnabled = false
+            etBarcode.hint = getString(R.string.barcode_prompt_msg_indic)
+            tvBarcode.text = getString(R.string.new_indicator)
+        }
 
         //label
         if (mItemTag.label.isNotBlank())
@@ -309,13 +307,24 @@ class EditTagFragment : Fragment() {
 
     private fun loadImageDisplay(loadBarcodeBitmap: Boolean): Boolean {
 
+        Log.d("loadImageDisplay", "imageview null : "+"${ivImageDisplay.drawable == null}")
+        Log.d("loadImageDisplay", "barcode  : "+ mItemTag.barcode)
+        Log.d("loadImageDisplay", "barcode format : ${mItemTag.barcodeFormat}")
+
         //Show barcode image
         if (loadBarcodeBitmap){
             //create the images only if it's not cashed
             if (ivBarcodeDisplay.drawable == null){
 
+                //Nothing to gen
+                if (mItemTag.barcode.isEmpty() || mItemTag.barcodeFormat.isEmpty()){
+                    Toast.makeText(requireContext(), "Cant generate barcode", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+
                 //barcode format
                 val format = BarcodeFormat.valueOf(mItemTag.barcodeFormat)
+                Log.d("loadImageDisplay", "barcode format : $format")
 
                 //Writer
                 val writer: Writer = when (format){
@@ -329,12 +338,6 @@ class EditTagFragment : Fragment() {
                         Toast.makeText(requireContext(), "Sorry, can't recreate the barcode", Toast.LENGTH_SHORT).show()
                         return false
                     }
-                }
-
-                //Nothing to gen
-                if (mItemTag.barcode.isEmpty()){
-                    Toast.makeText(requireContext(), "Cant generate barcode", Toast.LENGTH_SHORT).show()
-                    return false
                 }
 
                 try {
@@ -365,9 +368,17 @@ class EditTagFragment : Fragment() {
                 //From ByteArray
                 ivImageDisplay.setImageBitmap(
                     mItemTag.imageByteArray.toBitmap())
-            }else{
-                //From Url
 
+                Log.d("loadImageDisplay", "image loaded from ByteArray")
+            }else if(mItemTag.imageURL.isNotEmpty()){
+                Picasso.get()
+                    .load(mItemTag.imageURL) // URL of the image
+                    .placeholder(R.drawable.ic_change_circle) // Optional placeholder
+                    .error(R.drawable.ic_image_broken) // Optional error image
+                    .into(ivImageDisplay) // Target ImageView
+                Log.d("loadImageDisplay", "image loaded from Url")
+            }
+            else{
                 //if there is still no image show the place holder
                 ivImageDisplay.setImageResource(R.drawable.ic_add_a_photo)
             }

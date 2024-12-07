@@ -7,7 +7,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,8 +20,6 @@ class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedLis
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var touchBlocker: View
 
-    private var firstLoad: Boolean = true
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -31,18 +28,26 @@ class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedLis
         drawerLayout = findViewById(R.id.drawer_layout)
         touchBlocker = findViewById(R.id.touch_blocker)
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.content_frame, LoadingScreenFragment.newInstance("Loading item list…")) // Replaces the entire screen content
-            .addToBackStack(null)
-            .commit()
+//        supportFragmentManager.beginTransaction()
+//            .replace(R.id.content_frame, LoadingScreenFragment.newInstance("Loading item list…")) // Replaces the entire screen content
+//            .commit()
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.side_menu_container, SideMenuFragment()) // Replaces the entire screen content
-            .addToBackStack(null)
             .commit()
 
-        onMainContentChangeRequest(ListViewFragment())
 
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+
+                // Initialize the database
+                db = DatabaseHelper.getInstance(this@MainActivity)
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, ListViewFragment())
+                    .addToBackStack("listview_fragment")
+                    .commit()
+            }
+        }
         manageSideMenu()
     }
 
@@ -86,8 +91,7 @@ class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedLis
                     withContext(Dispatchers.IO) {
                         // Load the database in a background thread
                         db = DatabaseHelper.getInstance(this@MainActivity)
-                        val list = db.getAllTags().reversed().toCollection(ArrayList())
-                        val frag = ListViewFragment.newInstance(list, db)
+                        val frag = ListViewFragment()
                         supportFragmentManager.beginTransaction()
                             .setCustomAnimations(
                                 R.anim.fade_and_slide_in,  // Animation for fragment entering
@@ -111,7 +115,7 @@ class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedLis
                     R.anim.fade_and_slide_in,  // Animation for fragment entering (when popping back)
                     R.anim.fade_and_slide_out   // Animation for fragment exiting (when popping back)
                 )
-                .add(R.id.content_frame, fragment)
+                .replace(R.id.content_frame, fragment)
                 .addToBackStack(null) // Add to back stack for navigation
                 .commit()
         }
@@ -123,20 +127,6 @@ class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedLis
         // Check if the container already has the desired fragment
         return currentFragment != null && currentFragment::class == newFragment::class
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//        Log.d("onResume", "OnResume In progress")
-//        try {
-//            if(tagAdapter.filteredTags.hashCode() != db.hashCode())
-//                Log.d("onResume", "Adapter Filter Check = Different")
-//            else
-//                Log.d("onResume", "Adapter Filter Check = Same")
-//        }
-//        catch (e: Exception){
-//            Log.e("onResume", "Error : ${e.message}")
-//        }
-//    }
 
     //TODO:
     private fun lazyLoadItemTags(){
@@ -176,17 +166,5 @@ class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedLis
 //            }
 //        }
 //    }
-
-    private fun getDummyItems():ArrayList<ItemTag>{
-        val tagList = ArrayList<ItemTag>()
-        for(i in 0..3){
-            var itm = ItemTag()
-            itm.id = i
-            itm.label = i.toString()
-            itm.barcode = i.toString()
-            tagList.add(itm)
-        }
-        return  tagList
-    }
 }
 

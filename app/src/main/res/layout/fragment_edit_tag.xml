@@ -5,105 +5,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/fragmentBackground"
-    tools:context=".EditTagFragment">
-
-    <EditText
-        android:id="@+id/et_label"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:gravity="start|bottom"
-        android:ems="10"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:inputType="textCapSentences"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:importantForAutofill="no"
-        android:hint="@string/blank_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_name_indic"
-        app:layout_constraintTop_toBottomOf="@+id/tv_name_indic"
-        />
+    android:background="?attr/mt_fragment_background"
+    tools:context=".EditTagFragment"
+    android:clipChildren="true"
+    android:clipToPadding="true"
+    >
 
     <TextView
-        android:id="@+id/tv_barcode"
-        android:layout_marginTop="200dp"
-        android:layout_width="0dp"
-        android:layout_height="32dp"
-        android:elegantTextHeight="true"
-        tools:text="Barcode ▲"
-        android:textAlignment="center"
-        android:textAllCaps="false"
-        android:textIsSelectable="false"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_brand_indic"
+        android:id="@+id/tv_new_barcode_indic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
-        android:hint="@string/brand_indicator"
+        android:hint="barcode"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/et_label"
+        app:layout_constraintTop_toBottomOf="@id/tv_barcode"
         />
-
-    <EditText
-        android:id="@+id/et_brand"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:inputType="textCapSentences"
-        android:textSize="16sp"
-        android:hint="@string/blank_text"
-        android:ems="10"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:gravity="start|bottom"
-        android:importantForAutofill="no"
-        app:layout_constraintTop_toBottomOf="@+id/tv_brand_indic"
-        app:layout_constraintStart_toStartOf="@+id/tv_brand_indic"
-        />
-
-    <TextView
-        tools:visibility="visible"
-        android:visibility="invisible"
-        android:id="@+id/tv_PriceTags_label"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="150dp"
-        android:text="@string/price_tags_indicator"
-        android:textAlignment="center"
-        android:textAllCaps="false"
-        android:textIsSelectable="false"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
-
-    <TextView
-        android:id="@+id/tv_name_indic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:hint="@string/label_indicator"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
-
 
     <ImageView
         android:id="@+id/iv_barcode"
@@ -138,21 +58,22 @@
         app:srcCompat="@drawable/ic_add_a_photo"
         />
 
-    <EditText
-        android:id="@+id/et_default_price"
-        android:layout_width="70dp"
-        android:layout_height="40dp"
-        android:textAlignment="textEnd"
-        android:inputType="numberDecimal"
-        android:selectAllOnFocus="true"
-        android:importantForAutofill="no"
-        android:padding="0dp"
+    <TextView
+        android:id="@+id/tv_barcode"
+        android:layout_marginTop="200dp"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:elegantTextHeight="true"
+        tools:text="Barcode ▲"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textIsSelectable="false"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintRight_toRightOf="@id/tv_price_indic"
-        app:layout_constraintTop_toBottomOf="@+id/tv_price_indic"
-        android:hint="@string/price_hint_default"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_price_indic"
@@ -165,6 +86,183 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
 
+    <EditText
+        android:id="@+id/et_new_barcode"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:inputType="textCapSentences"
+        android:textSize="16sp"
+        android:hint="@string/blank_text"
+        android:ems="10"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:gravity="start|bottom"
+        android:importantForAutofill="no"
+        app:layout_constraintStart_toStartOf="@+id/tv_new_barcode_indic"
+        app:layout_constraintTop_toBottomOf="@+id/tv_new_barcode_indic"
+        />
+
+    <TextView
+        android:id="@+id/tv_name_indic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:hint="@string/label_indicator"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_new_barcode" />
+
+    <EditText
+        android:id="@+id/et_label"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:gravity="start|bottom"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:inputType="textCapSentences"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:importantForAutofill="no"
+        android:hint="@string/blank_text"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/tv_name_indic"
+        app:layout_constraintTop_toBottomOf="@+id/tv_name_indic"
+        />
+
+    <EditText
+        android:id="@+id/et_default_price"
+        android:layout_width="70dp"
+        android:layout_height="44dp"
+        android:textAlignment="textEnd"
+        android:inputType="numberDecimal"
+        android:selectAllOnFocus="true"
+        android:importantForAutofill="no"
+        android:padding="0dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintRight_toRightOf="@id/tv_price_indic"
+        app:layout_constraintTop_toBottomOf="@+id/tv_price_indic"
+        android:hint="@string/price_hint_default"
+        />
+
+    <LinearLayout
+        android:id="@+id/ll_extra_info_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        app:layout_constraintTop_toBottomOf="@id/et_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        >
+
+        <TextView
+            android:id="@+id/tv_barcode_indic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:hint="@string/barcode_indicator"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            />
+        <EditText
+            android:enabled="false"
+            android:id="@+id/et_barcode"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textCapSentences"
+            android:textSize="16sp"
+            android:hint="@string/blank_text"
+            android:ems="10"
+            android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/tv_barcode_format_indic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:hint="Code format"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            />
+        <EditText
+            android:id="@+id/et_barcode_format"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:enabled="false"
+            android:inputType="textCapSentences"
+            android:textSize="16sp"
+            android:hint="@string/blank_text"
+            android:ems="10"
+            android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/tv_brand_indic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:hint="@string/brand_indicator"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            />
+        <EditText
+            android:id="@+id/et_brand"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textCapSentences"
+            android:textSize="16sp"
+            android:hint="@string/blank_text"
+            android:ems="10"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"/>
+
+        <TextView
+            android:id="@+id/tv_img_url_indic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:hint="image URL"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            />
+        <EditText
+            android:id="@+id/et_url"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textUri"
+            android:textSize="16sp"
+            android:hint="@string/blank_text"
+            android:ems="10"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"/>
+
+        <TextView
+            android:id="@+id/tv_category_indic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:hint="Food, drinks, etc"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            />
+        <EditText
+            android:id="@+id/et_category"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textUri"
+            android:textSize="16sp"
+            android:hint="@string/blank_text"
+            android:ems="10"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"/>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tv_tag_date"
         android:layout_width="wrap_content"
@@ -174,10 +272,45 @@
         android:textStyle="italic"
         android:paddingStart="10dp"
         android:paddingEnd="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_PriceTags_label"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_brand"
+        app:layout_constraintTop_toBottomOf="@+id/ll_extra_info_layout"
         />
+
+    <Button
+        tools:visibility="visible"
+        android:id="@+id/btn_extra_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Extra info"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textIsSelectable="false"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_tag_date" />
+
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/tv_PriceTags_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/price_tags_indicator"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textIsSelectable="false"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_tag_date" />
+
+    <FrameLayout
+        android:id="@+id/note_list_display_frame_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tv_PriceTags_label"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
