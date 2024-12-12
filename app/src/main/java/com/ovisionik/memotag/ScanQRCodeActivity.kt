@@ -82,6 +82,7 @@ class ScanQRCodeActivity : AppCompatActivity() {
         val intent = Intent()
         intent.putExtra("action", "editTag_fragment")
         intent.putExtra("code", mItemTag.barcode)
+        intent.putExtra("format", mItemTag.barcodeFormat)
 
         setResult(RESULT_OK, intent)
         finish() // Close this activity
@@ -103,7 +104,6 @@ class ScanQRCodeActivity : AppCompatActivity() {
             //Got result
             mFormatName = result.formatName
             mScannedCode = result.contents.toString()
-
             val tag = ItemTag()
 
             tag.barcode = mScannedCode

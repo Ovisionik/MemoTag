@@ -4,62 +4,162 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="106dp"
+    android:layout_height="112dp"
     android:layout_marginTop="4dp"
     android:layout_marginBottom="0dp"
     android:layout_marginHorizontal="4dp"
     android:outlineSpotShadowColor="@color/colorAccent"
-
     app:cardCornerRadius="8dp"
     app:cardElevation="16dp">
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- More Options Icon -->
         <ImageView
-            android:contentDescription="@string/card_view_more_option_description"
             android:id="@+id/cv_more_option"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
             android:rotation="90"
             android:src="@drawable/ic_more_horizontal"
+            android:contentDescription="@string/card_view_more_option_description"
             app:tint="@color/secondary"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.05" />
+
+        <!-- Tag Image -->
         <ImageView
             android:id="@+id/cv_tag_image_value"
-            android:layout_width="64dp"
-            android:layout_height="96dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
-
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="8dp"
             android:contentDescription="@string/card_view_image_description"
+            tools:src="?attr/colorSecondary"
             android:scaleType="centerCrop"
-            tools:src="?attr/colorSecondary" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="4:5"/>
 
+        <!-- Label -->
         <TextView
             android:id="@+id/cv_label_value"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
             android:paddingStart="90dp"
             android:paddingEnd="50dp"
             android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:maxLines="1"
-            tools:text="Label"
             android:textAlignment="center"
             android:textSize="16sp"
             android:textStyle="bold"
+            tools:text="Label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Price -->
+        <TextView
+            android:id="@+id/cv_price_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center|end"
+            android:maxWidth="100dp"
+            android:padding="8dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cv_more_option"
+            tools:text="12.5 €"
+            app:layout_constraintVertical_bias="0"
             />
+        <!-- Brand Indicator -->
+        <TextView
+            android:layout_marginStart="8dp"
+            android:id="@+id/brand_indic"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/brand_indicator"
+            app:layout_constraintTop_toBottomOf="@id/cv_label_value"
+            app:layout_constraintStart_toEndOf="@id/cv_tag_image_value" />
+
+        <!-- Brand Value -->
+        <TextView
+            android:id="@+id/brand_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            tools:text="Some brand TM"
+            app:layout_constraintTop_toBottomOf="@id/cv_label_value"
+            app:layout_constraintStart_toEndOf="@id/brand_indic"
+            app:layout_constraintEnd_toStartOf="@id/cv_price_value" />
+
+        <!-- Barcode Indicator -->
+        <TextView
+            android:layout_marginStart="8dp"
+            android:id="@+id/barcode_indic"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/barcode_indicator"
+            app:layout_constraintTop_toBottomOf="@id/brand_indic"
+            app:layout_constraintStart_toEndOf="@id/cv_tag_image_value" />
+
+        <!-- Barcode Value -->
+        <TextView
+            android:id="@+id/barcode_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            tools:text="48564642"
+            app:layout_constraintTop_toBottomOf="@id/brand_value"
+            app:layout_constraintStart_toEndOf="@id/brand_indic"
+            app:layout_constraintEnd_toStartOf="@id/cv_price_value" />
+
+        <!-- Category Indicator -->
+        <TextView
+            android:id="@+id/category_indic"
+            android:layout_marginStart="8dp"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/category_indicator"
+            app:layout_constraintTop_toBottomOf="@id/barcode_indic"
+            app:layout_constraintStart_toEndOf="@id/cv_tag_image_value" />
+
+        <!-- Category Value -->
+        <TextView
+            android:id="@+id/category_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            tools:text="Other"
+            app:layout_constraintTop_toBottomOf="@id/barcode_value"
+            app:layout_constraintStart_toEndOf="@id/brand_indic"
+            app:layout_constraintEnd_toStartOf="@id/cv_price_value" />
+
+        <!-- ID Indicator -->
+        <TextView
+            android:layout_marginStart="8dp"
+            android:id="@+id/id_indic"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/id_indicator"
+            app:layout_constraintTop_toBottomOf="@id/category_value"
+            app:layout_constraintStart_toEndOf="@id/cv_tag_image_value" />
+
+        <!-- ID Value -->
+        <TextView
+            android:id="@+id/id_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            tools:text="12"
+            app:layout_constraintTop_toBottomOf="@id/category_value"
+            app:layout_constraintStart_toEndOf="@id/brand_indic"
+            app:layout_constraintEnd_toStartOf="@id/cv_price_value" />
 
         <TextView
             android:id="@+id/cv_date_value"
@@ -73,109 +173,11 @@
             android:layout_alignParentBottom="true"
             android:gravity="bottom|end"
             tools:text="1999.06.09 12:30"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="1"
             android:textStyle="italic" />
 
-
-        <TextView
-            android:id="@+id/brand_indic"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/cv_label_value"
-            android:layout_toEndOf="@id/cv_tag_image_value"
-            android:text="@string/brand_indicator" />
-
-        <TextView
-            android:id="@+id/brand_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/cv_label_value"
-
-            android:maxLines="1"
-
-            android:layout_toEndOf="@+id/brand_indic"
-            android:layout_toStartOf="@+id/cv_price_value"
-
-            tools:text="Some brand TM" />
-
-        <TextView
-            android:id="@+id/category_indic"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-
-            android:layout_toEndOf="@id/cv_tag_image_value"
-            android:layout_below="@+id/barcode_indic"
-            android:text="@string/category_indicator" />
-
-        <TextView
-            android:id="@+id/category_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            tools:text="Other"
-            android:maxLines="1"
-
-            android:layout_below="@+id/barcode_value"
-            android:layout_toStartOf="@+id/cv_price_value"
-            android:layout_toEndOf="@id/brand_indic"
-            />
-
-        <TextView
-            android:id="@+id/barcode_indic"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-
-            android:text="@string/barcode_indicator"
-
-            android:layout_toEndOf="@id/cv_tag_image_value"
-            android:layout_below="@+id/brand_indic"
-            />
-
-        <TextView
-            android:id="@+id/barcode_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            tools:text="48564642"
-            android:maxLines="1"
-
-            android:layout_below="@+id/brand_value"
-            android:layout_toStartOf="@+id/cv_price_value"
-            android:layout_toEndOf="@id/brand_indic"
-            />
-
-        <TextView
-            android:id="@+id/id_indic"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-
-            android:layout_below="@+id/category_value"
-            android:layout_toEndOf="@id/cv_tag_image_value"
-            android:text="@string/id_indicator" />
-
-        <TextView
-            android:id="@+id/id_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            tools:text="12"
-            android:maxLines="1"
-
-            android:layout_below="@+id/category_value"
-            android:layout_toStartOf="@+id/cv_price_value"
-            android:layout_toEndOf="@+id/brand_indic"
-            />
-
-        <TextView
-            android:id="@+id/cv_price_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerInParent="true"
-            android:gravity="center|end"
-            android:maxWidth="100dp"
-            android:padding="8dp"
-            android:textStyle="bold"
-            tools:text="12.5 €" />
-
-    </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

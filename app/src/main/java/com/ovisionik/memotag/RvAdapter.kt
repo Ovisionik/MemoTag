@@ -16,7 +16,7 @@ import com.squareup.picasso.Picasso
 
 
 class RvAdapter(
-    private var items: List<ItemTag>,
+    items: List<ItemTag>,
     private val clickListener: (ItemTag) -> Unit // Pass a click listener as a lambda
 ) : RecyclerView.Adapter<RvAdapter.ViewHolder>() {
 
@@ -152,16 +152,5 @@ class RvAdapter(
     fun itemChanged(item: ItemTag){
         val mIndex = filteredTags.indexOfFirst { i -> i.id == item.id }
         notifyItemChanged(mIndex)
-    }
-
-    fun updateItems(newItems: List<ItemTag>) {
-        // Clear the current items
-        filteredTags.clear()
-
-        // Update the filtered list as well
-        filteredTags = ArrayList(newItems)
-
-        // Notify the adapter that the dataset has changed
-        notifyDataSetChanged()
     }
 }

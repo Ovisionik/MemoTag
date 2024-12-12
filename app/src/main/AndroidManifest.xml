@@ -21,9 +21,9 @@
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:theme="@style/Theme.MemoTag"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MemoTag"
         tools:targetApi="31">
 
         <activity
@@ -33,10 +33,12 @@
         <activity
             android:name=".ScanQRCodeActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:label="MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -8,6 +8,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.ovisionik.memotag.db.DatabaseHelper
+import com.ovisionik.memotag.utils.MemoTagThemeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity(), SideMenuFragment.OnMenuItemSelectedLis
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MemoTagThemeUtils.applyUserPrefTheme(this)
         setContentView(R.layout.activity_main)
 
         // Initialize components

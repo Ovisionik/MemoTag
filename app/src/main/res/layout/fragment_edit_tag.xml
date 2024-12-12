@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -10,20 +11,6 @@
     android:clipChildren="true"
     android:clipToPadding="true"
     >
-
-    <TextView
-        android:id="@+id/tv_new_barcode_indic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:hint="barcode"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_barcode"
-        />
 
     <ImageView
         android:id="@+id/iv_barcode"
@@ -59,6 +46,37 @@
         />
 
     <TextView
+        android:id="@+id/tv_new_barcode_indic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:hint="@string/barcode_indicator"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_barcode"
+        />
+
+    <EditText
+        android:id="@+id/et_new_barcode"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:inputType="textCapSentences"
+        android:textSize="16sp"
+        android:hint="@string/blank_text"
+        android:ems="10"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:gravity="start|bottom"
+        android:importantForAutofill="no"
+        app:layout_constraintStart_toStartOf="@+id/tv_new_barcode_indic"
+        app:layout_constraintTop_toBottomOf="@+id/tv_new_barcode_indic"
+        />
+
+    <TextView
         android:id="@+id/tv_barcode"
         android:layout_marginTop="200dp"
         android:layout_width="0dp"
@@ -79,39 +97,25 @@
         android:id="@+id/tv_price_indic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="12dp"
         android:hint="@string/price_indicator"
-        android:textSize="12sp"
+        android:paddingStart="4dp"
+        android:paddingEnd="8dp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_barcode" />
+        app:layout_constraintTop_toBottomOf="@id/tv_barcode" />
 
-    <EditText
-        android:id="@+id/et_new_barcode"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:inputType="textCapSentences"
-        android:textSize="16sp"
-        android:hint="@string/blank_text"
-        android:ems="10"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:gravity="start|bottom"
-        android:importantForAutofill="no"
-        app:layout_constraintStart_toStartOf="@+id/tv_new_barcode_indic"
-        app:layout_constraintTop_toBottomOf="@+id/tv_new_barcode_indic"
-        />
 
     <TextView
         android:id="@+id/tv_name_indic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         android:hint="@string/label_indicator"
-        android:textSize="12sp"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_new_barcode" />
 
@@ -136,24 +140,27 @@
     <EditText
         android:id="@+id/et_default_price"
         android:layout_width="70dp"
-        android:layout_height="44dp"
-        android:textAlignment="textEnd"
-        android:inputType="numberDecimal"
-        android:selectAllOnFocus="true"
-        android:importantForAutofill="no"
-        android:padding="0dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintRight_toRightOf="@id/tv_price_indic"
-        app:layout_constraintTop_toBottomOf="@+id/tv_price_indic"
+        android:layout_height="38dp"
         android:hint="@string/price_hint_default"
-        />
+        android:importantForAutofill="no"
+        android:inputType="numberDecimal"
+        android:padding="0dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="8dp"
+        android:selectAllOnFocus="true"
+        android:textAlignment="textEnd"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintRight_toRightOf="@id/tv_price_indic"
+        app:layout_constraintTop_toBottomOf="@+id/tv_price_indic" />
 
     <LinearLayout
         android:id="@+id/ll_extra_info_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        tools:visibility="visible"
         android:visibility="gone"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
@@ -163,50 +170,10 @@
         >
 
         <TextView
-            android:id="@+id/tv_barcode_indic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:hint="@string/barcode_indicator"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="12dp"
-            />
-        <EditText
-            android:enabled="false"
-            android:id="@+id/et_barcode"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:inputType="textCapSentences"
-            android:textSize="16sp"
-            android:hint="@string/blank_text"
-            android:ems="10"
-            android:maxLines="1"/>
-
-        <TextView
-            android:id="@+id/tv_barcode_format_indic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:hint="Code format"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="12dp"
-            />
-        <EditText
-            android:id="@+id/et_barcode_format"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:enabled="false"
-            android:inputType="textCapSentences"
-            android:textSize="16sp"
-            android:hint="@string/blank_text"
-            android:ems="10"
-            android:maxLines="1"/>
-
-        <TextView
             android:id="@+id/tv_brand_indic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:hint="@string/brand_indicator"
             android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
@@ -219,6 +186,8 @@
             android:textSize="16sp"
             android:hint="@string/blank_text"
             android:ems="10"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
             android:maxLines="1"
             android:selectAllOnFocus="true"/>
 
@@ -226,7 +195,7 @@
             android:id="@+id/tv_img_url_indic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:hint="image URL"
             android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
@@ -240,13 +209,15 @@
             android:hint="@string/blank_text"
             android:ems="10"
             android:maxLines="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
             android:selectAllOnFocus="true"/>
 
         <TextView
             android:id="@+id/tv_category_indic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:hint="Food, drinks, etc"
             android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
@@ -260,7 +231,53 @@
             android:hint="@string/blank_text"
             android:ems="10"
             android:maxLines="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
             android:selectAllOnFocus="true"/>
+
+        <TextView
+            android:id="@+id/tv_barcode_indic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:hint="@string/barcode_indicator"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            />
+        <EditText
+            android:enabled="false"
+            android:id="@+id/et_barcode"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textCapSentences"
+            android:textSize="16sp"
+            android:hint="@string/blank_text"
+            android:ems="10"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
+            android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/tv_barcode_format_indic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:hint="Barcode format"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            />
+        <EditText
+            android:id="@+id/et_barcode_format"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:enabled="false"
+            android:inputType="textCapSentences"
+            android:textSize="16sp"
+            android:hint="@string/blank_text"
+            android:ems="10"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
+            android:maxLines="1"/>
     </LinearLayout>
 
     <TextView
@@ -270,9 +287,11 @@
         tools:hint="Date"
         android:textAlignment="textEnd"
         android:textStyle="italic"
+        android:layout_marginTop="8dp"
         android:paddingStart="10dp"
         android:paddingEnd="12dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintTop_toBottomOf="@+id/ll_extra_info_layout"
         />
 
@@ -364,5 +383,4 @@
             />
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -51,6 +51,8 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.8.3")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     testImplementation("junit:junit:4.13.2")
     implementation("org.jsoup:jsoup:1.17.2")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")

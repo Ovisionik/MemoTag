@@ -2,14 +2,17 @@ package com.ovisionik.memotag
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -50,6 +53,7 @@ import kotlinx.coroutines.launch
 
 class EditTagFragment : Fragment() {
 
+    //Flags
     private var mDisplayBarcode: Boolean = false
     private var cameraIsBusy = false
 
@@ -63,7 +67,11 @@ class EditTagFragment : Fragment() {
     private lateinit var ivBarcodeDisplay: ImageView
     private lateinit var etLabel: EditText
     private lateinit var etBrand: EditText
+    private lateinit var etNewBarcode: EditText
     private lateinit var etBarcode: EditText
+    private lateinit var etBarcodeFormat: EditText
+    private lateinit var etCategory: EditText
+    private lateinit var etURL: EditText
 
     private lateinit var etDefaultPrice: EditText
     private lateinit var tvTagCreationDate: TextView
@@ -131,7 +139,7 @@ class EditTagFragment : Fragment() {
         db = DatabaseHelper.getInstance(requireContext())
         scraper = ItemTagWebScraper()
 
-        updateViews()
+        updateViews(mItemTag)
         loadImageDisplay(mDisplayBarcode)
 
         setupListeners()
@@ -140,7 +148,12 @@ class EditTagFragment : Fragment() {
     private fun initVar(view: View) {
         etLabel = view.findViewById(R.id.et_label)
         etBrand = view.findViewById(R.id.et_brand)
-        etBarcode = view.findViewById(R.id.et_new_barcode)
+        etCategory = view.findViewById(R.id.et_category)
+        etNewBarcode = view.findViewById(R.id.et_new_barcode)
+        etBarcode   = view.findViewById(R.id.et_barcode)
+        etBarcodeFormat = view.findViewById(R.id.et_barcode_format)
+        etURL   = view.findViewById(R.id.et_url)
+
         tvBarcode = view.findViewById(R.id.tv_barcode)
         etDefaultPrice = view.findViewById(R.id.et_default_price)
         tvTagCreationDate = view.findViewById(R.id.tv_tag_date)
@@ -217,7 +230,18 @@ class EditTagFragment : Fragment() {
         }
 
         btnClose.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            val rootView = requireActivity().window.decorView.rootView
+            // Check if keyboard is open
+            val isKeyboardOpen = isKeyboardVisible(rootView)
+
+            if (isKeyboardOpen) {
+                // Close the keyboard
+                val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(rootView.windowToken, 0)
+            } else {
+                // Close the fragment
+                parentFragmentManager.popBackStack()
+            }
         }
 
         btnWebSearch.setOnClickListener {
@@ -235,8 +259,8 @@ class EditTagFragment : Fragment() {
 
         btnSave.setOnClickListener {
 
-            if (etBarcode.text.isNotEmpty()) {
-                mItemTag.barcode = etBarcode.text.toString()
+            if (etNewBarcode.text.isNotEmpty()) {
+                mItemTag.barcode = etNewBarcode.text.toString()
             }else{
                 Toast.makeText(context, getString(R.string.barcode_prompt_msg), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -248,6 +272,15 @@ class EditTagFragment : Fragment() {
             if (etBrand.text.isNotEmpty()) {
                 mItemTag.brand = etBrand.text.toString()
             }
+
+            if (etCategory.text.isNotEmpty()) {
+                mItemTag.category = etCategory.text.toString()
+            }
+
+            if (etURL.text.isNotEmpty()) {
+                mItemTag.imageURL = etURL.text.toString()
+            }
+
             if (etDefaultPrice.text.isNotEmpty()) {
                 mItemTag.defaultPrice = etDefaultPrice.text.toString().toDoubleOrNull() ?: 0.00
             }
@@ -260,51 +293,92 @@ class EditTagFragment : Fragment() {
             Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
 
             //Notify the list viewer the item with this id changed
-            setFragmentResult("saveTagKey", bundleOf("tagID" to mItemTag.id))
+            setFragmentResult("saveTagKey", bundleOf("modifiedTag" to mItemTag))
+
             parentFragmentManager.popBackStack()
         }
     }
 
-    private fun updateViews() {
+    private fun isKeyboardVisible(rootView: View): Boolean {
+        val visibleBounds = Rect()
+        rootView.getWindowVisibleDisplayFrame(visibleBounds)
+
+        val screenHeight = rootView.height
+        val keypadHeight = screenHeight - visibleBounds.bottom
+
+        // If the keypad height is more than 25% of the screen height, it is probably visible
+        return keypadHeight > screenHeight * 0.25
+    }
+
+    private fun updateViews(itm: ItemTag){
 
         //barcode
-        if (mItemTag.barcode.isNotBlank())
+        if (itm.barcode.isNotBlank())
         {
-            tvBarcode.text = mItemTag.barcode.plus(" " + if(mDisplayBarcode)"◈" else "❖")
+            //Old item ->
+
+            tvBarcode.text = itm.barcode.plus(" " + if(mDisplayBarcode)"◈" else "❖")
 
             //Show the barcode field?
             view?.findViewById<TextView>(R.id.tv_new_barcode_indic)?.visibility = View.GONE
             view?.findViewById<EditText>(R.id.et_new_barcode)?.visibility = View.GONE
-            etBarcode.setText(mItemTag.barcode)
-            etBarcode.isEnabled = false
+            etNewBarcode.setText(itm.barcode)
+            etBarcode.setText(itm.barcode)
+
         }else{
             //For new item let the user set the barcode/id
+
+            view?.findViewById<TextView>(R.id.tv_barcode_indic)?.visibility = View.GONE
+            view?.findViewById<EditText>(R.id.et_barcode)?.visibility = View.GONE
+
             tvBarcode.isEnabled = false
-            etBarcode.hint = getString(R.string.barcode_prompt_msg_indic)
+            etNewBarcode.hint = getString(R.string.barcode_prompt_msg_indic)
             tvBarcode.text = getString(R.string.new_indicator)
         }
 
         //label
-        if (mItemTag.label.isNotBlank())
+        if (itm.label.isNotBlank())
         {
-            etLabel.hint = mItemTag.label
+            etLabel.hint = itm.label
             etLabel.setText(etLabel.hint)
+        }else{
+            etLabel.hint = getString(R.string.label_prompt_msg)
         }
 
         //brand
-        if (mItemTag.brand.isNotBlank())
+        if (itm.brand.isNotBlank())
         {
-            etBrand.hint = mItemTag.brand
+            etBrand.hint = itm.brand
             etBrand.setText(etBrand.hint)
         }
 
+        //Format
+        if (itm.barcodeFormat.isNotBlank())
+        {
+            etBarcodeFormat.hint = itm.barcodeFormat
+            etBarcodeFormat.setText(etBarcodeFormat.hint)
+        }
+
+        //item Url
+        if (itm.imageURL.isNotBlank())
+        {
+            etURL.hint = itm.imageURL
+            etURL.setText(etURL.hint)
+        }
+
+        //category
+        if (itm.category.isNotBlank())
+        {
+            etCategory.hint = itm.category
+            etCategory.setText(etCategory.hint)
+        }
+
         //price
-        etDefaultPrice.hint = mItemTag.moneyString()
+        etDefaultPrice.hint = itm.moneyString()
 
         //date
-        tvTagCreationDate.hint = mItemTag.createdOn
+        tvTagCreationDate.hint = itm.createdOn
     }
-
     private fun loadImageDisplay(loadBarcodeBitmap: Boolean): Boolean {
 
         Log.d("loadImageDisplay", "imageview null : "+"${ivImageDisplay.drawable == null}")
@@ -418,14 +492,15 @@ class EditTagFragment : Fragment() {
                 if (etLabel.text.isBlank())             { mItemTag.label            = scrap.label           }
                 if (etBrand.text.isBlank())             { mItemTag.brand            = scrap.brand           }
                 if (mItemTag.category.isBlank())        { mItemTag.category         = scrap.category        }
-                if (mItemTag.imageByteArray.isEmpty())  { mItemTag.imageByteArray   = scrap.imageByteArray  }
+                if (mItemTag.imageURL.isBlank())        { mItemTag.imageURL         = scrap.imageURL        }
+                //if (mItemTag.imageByteArray.isEmpty())  { mItemTag.imageByteArray   = scrap.imageByteArray  }
             }
 
             launch(Dispatchers.Main) {
                 //Update views
                 Toast.makeText(requireContext(), "Done", Toast.LENGTH_SHORT).show()
                 loadImageDisplay(false)
-                updateViews()
+                updateViews(mItemTag)
             }
         }
     }

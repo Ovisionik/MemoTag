@@ -1,8 +1,6 @@
 package com.ovisionik.memotag.scraper
 import android.util.Log
 import com.ovisionik.memotag.data.ItemTag
-import com.ovisionik.memotag.utils.BitmapUtils
-import com.ovisionik.memotag.utils.BitmapUtils.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -49,13 +47,13 @@ class ItemTagWebScraper {
             }.await()
         }
 
-        //Set Image ByteArray
-        if (mItemTag.imageByteArray.isEmpty() && mItemTag.imageURL.isNotBlank()){
-            async {
-                BitmapUtils.getBitmapFromUrlAsync(mItemTag.imageURL)?.
-                also { mItemTag.imageByteArray = it.toByteArray() } }
-            .await()
-        }
+//        //Set Image ByteArray
+//        if (mItemTag.imageByteArray.isEmpty() && mItemTag.imageURL.isNotBlank()){
+//            async {
+//                BitmapUtils.getBitmapFromUrlAsync(mItemTag.imageURL)?.
+//                also { mItemTag.imageByteArray = it.toByteArray() } }
+//            .await()
+//        }
 
         //done free the busy state
         isBusy = false

@@ -23,7 +23,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ovisionik.memotag.data.ItemTag
 import com.ovisionik.memotag.db.DatabaseHelper
 import com.ovisionik.memotag.utils.ExcelGoogleSheetUtils
-import com.ovisionik.memotag.utils.MemoTagThemeUtils
 import com.ovisionik.memotag.utils.PermissionManagerUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,8 +41,6 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        MemoTagThemeUtils.applyUserPrefTheme(requireContext())
 
         database = DatabaseHelper.getInstance(requireContext())
 
@@ -105,8 +102,7 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
 
             //Hide keyboard if any
             val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(view?.windowToken, 0)
-
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
             val query = etFilterList.text.toString()
 
             //search / filter
@@ -115,16 +111,20 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
 
         //listen for the item if it was saved in Edit Tag fragment to apply the modifications
         requireActivity().supportFragmentManager.setFragmentResultListener("saveTagKey", this) { key, bundle ->
-            val tagID = bundle.getInt("tagID") // Retrieve the data using the same key
-            Log.d("ResultListener", "Received key: $key") // Handle the received data
-            Log.d("ResultListener", "Received tag: $tagID") // Handle the received data
+
             //Update adapter? so it has the new modified list
-            val modTag = database.findItemTagByID(tagID)
-            if(tagID < 0) { //-1 = new item
+            val modifiedTag = bundle.getParcelable<ItemTag>("modifiedTag") ?: return@setFragmentResultListener
+
+            // Handle the received data
+            Log.d("dbg - ResultListener", "Received tag: $modifiedTag")
+
+            if(modifiedTag.id < 0){
+                //For new item
                 btnItemFilter.callOnClick()
             }
-            else {
-                adapter.itemChanged(modTag as ItemTag)
+            else{
+                //Update existing item on the list
+                adapter.itemChanged(modifiedTag as ItemTag)
             }
         }
 
@@ -150,6 +150,16 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
 
         checkForAutoUpdateOption()
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        // Check if this fragment is being removed due to a back navigation
+        if (isRemoving && requireActivity().supportFragmentManager.backStackEntryCount == 0) {
+            Toast.makeText(requireContext(),"Press back again to exit the app", Toast.LENGTH_LONG).show()
+        }
+    }
+
 
     private fun checkForAutoUpdateOption() {
 
@@ -301,7 +311,7 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
             .add(R.id.content_frame, fragment)
             .addToBackStack(null)
             .commit()
-        println("Edit fragment launched for ${tag.barcode}")
+        println("Edit fragment launched for $tag")
     }
 
     private fun requestPermissions() {
@@ -320,18 +330,21 @@ class ListViewFragment : Fragment(R.layout.fragment_list_view) {
     private val scanQRCodeLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val action = result.data?.getStringExtra("action")
+        if (result.resultCode == RESULT_OK &&
+            result.data?.getStringExtra("action") == "editTag_fragment") {
+
             val barcode = result.data?.getStringExtra("code").toString()
+            val format = result.data?.getStringExtra("format").orEmpty()
 
             val db  = DatabaseHelper.getInstance(requireContext())
             val itm = db.findTagByBarcode(barcode)
 
-            if (action == "editTag_fragment" && itm !=null) {
+            if(itm !=null)
                 gotoEditTag(itm)
-            }else{
+            else{
                 val newTag = ItemTag()
                 newTag.barcode = barcode
+                newTag.barcodeFormat = format
                 gotoEditTag(newTag)
             }
         }

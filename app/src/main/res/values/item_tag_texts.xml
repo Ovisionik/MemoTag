@@ -7,12 +7,14 @@
     <string name="barcode_indicator">Barcode</string>
     <string name="category_indicator">Category</string>
     <string name="new_indicator">New</string>
+    <string name="new_item_indicator">New Item!</string>
     <string name="price_indicator">Price</string>
     <string name="date_indicator">Created on</string>
     <string name="price_tags_indicator">Price Tags</string>
     <string name="blank_text"> </string>
     <string name="barcode_prompt_msg">Please enter an unique barcode(ID) to register the item</string>
     <string name="barcode_prompt_msg_indic">Click here to enter an unique name/id/barcode</string>
+    <string name="label_prompt_msg">click here to name it</string>
 
     <!--Main Activity-->
     <string name="search_indicator">Search</string>
